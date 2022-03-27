@@ -1,11 +1,7 @@
 class SymbolTable:
     def __init__(self):
-        self.table = {}
+        self.table = []
     
-    def add_symbol(self, key, value):
-        self.table[key] = value
-    
-    def get_symbol(self, key):
-        if key in self.table:
-            return self.table[key]
-        return None
+    def add_symbol(self, lexeme):
+        if lexeme not in self.table:
+            self.table.append(lexeme)
