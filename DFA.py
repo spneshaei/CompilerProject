@@ -13,7 +13,7 @@ class DFA:
             "symbol_sign": ";",
             "other_sign": "!",
             "whitespace_sign": "-",
-            "lookahead_sign": "*", 
+            "lookahead_sign": "*",
             "starting_node_id": 0,
         }
         self.state_names = {
@@ -64,24 +64,24 @@ class DFA:
 
     def reset(self):
         self.current_state_id = self.settings['starting_node_id']
-    
+
     def next_char(self, input):
         input = self.get_symbol_of_char(input)
         current_state = self.transition_table[self.current_state_id]
         if input not in current_state['transitions']:
             if '!' in current_state['transitions']:
                 self.current_state_id = current_state['transitions']['!']
-            else:
-                pass #TODO: throw error
-        else:
-            self.current_state_id = current_state['transitions'][input]
-    
+                return True
+            return False
+        self.current_state_id = current_state['transitions'][input]
+        return True
+
     def is_finished(self):
         return self.transition_table[self.current_state_id]['end']
-    
+
     def get_type(self):
         return self.transition_table[self.current_state_id]['type']
-    
+
     def should_go_back(self):
         return self.transition_table[self.current_state_id]['should_go_back']
 

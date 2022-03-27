@@ -76,8 +76,8 @@
             "id": 4,
             "name": "W",
             "coord": {
-                "x": 273,
-                "y": 140
+                "x": 291,
+                "y": 106
             },
             "radius": 20,
             "end": true,
@@ -131,8 +131,8 @@
             "id": 9,
             "name": "9",
             "coord": {
-                "x": 362,
-                "y": 173
+                "x": 379,
+                "y": 167
             },
             "radius": 20,
             "end": false,
@@ -142,8 +142,8 @@
             "id": 10,
             "name": "10",
             "coord": {
-                "x": 434,
-                "y": 131
+                "x": 465,
+                "y": 103
             },
             "radius": 20,
             "end": false,
@@ -173,10 +173,21 @@
         },
         {
             "id": 13,
-            "name": "I",
+            "name": "13",
             "coord": {
                 "x": 518,
                 "y": 438
+            },
+            "radius": 20,
+            "end": false,
+            "start": false
+        },
+        {
+            "id": 14,
+            "name": "*I",
+            "coord": {
+                "x": 454,
+                "y": 515
             },
             "radius": 20,
             "end": true,
@@ -351,6 +362,22 @@
             "symbols": [
                 "@",
                 "%"
+            ]
+        },
+        {
+            "id": 21,
+            "state_src_id": 1,
+            "state_dst_id": 1,
+            "symbols": [
+                "%"
+            ]
+        },
+        {
+            "id": 22,
+            "state_src_id": 13,
+            "state_dst_id": 14,
+            "symbols": [
+                "!"
             ]
         }
     ]
