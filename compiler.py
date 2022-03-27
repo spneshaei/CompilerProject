@@ -24,13 +24,13 @@ class Compiler:
         if not c:
             self.end_of_file = True
         return c
-    
+
     def rewind_char(self):
         self.file.seek(self.file.tell() - 1)
 
     def is_whitespace(self, char):
         return char == " " or char == "\t" or char == "\n" or char == "\r" or char == "\v" or char == "\f"
-    
+
     def get_next_token(self):
         buffer = ""
         last_char = None
@@ -39,29 +39,33 @@ class Compiler:
             last_char = self.get_char()
             if (last_char == None):
                 break
-            if (last_char == "\n"):
-                self.line_no += 1
-            else:
+            if (last_char != "\n"):
                 buffer += last_char
             if (not self.dfa.next_char(last_char)):
                 self.errors.add_error("Invalid input", buffer, self.line_no)
+                if (last_char == "\n"):
+                    self.line_no += 1
                 return True
+        if self.dfa.should_go_back():
+            buffer = buffer[:-1]
+            self.rewind_char()
+            last_char = None
+        if (last_char == "\n"):
+            self.line_no += 1
         if self.dfa.is_error():
             self.errors.add_error(self.dfa.get_type(), buffer, self.line_no)
             return True
         if not self.dfa.is_finished():
             # TODO: maybe unclosed comment error?
             return False
-        if self.dfa.should_go_back():
-            buffer = buffer[:-1]
-            self.rewind_char()
-            last_char = None
         if (buffer in self.symbol_table.keywords):
             token_type = "KEYWORD"
         else:
             token_type = self.dfa.get_type()
         if (token_type != 'WHITESPACE' and token_type != 'COMMENT'):
             self.tokens.add_token(token_type, buffer, self.line_no)
+        if (token_type == 'ID'):
+            self.symbol_table.add_symbol(buffer)
         return True
 
 
@@ -73,3 +77,5 @@ print("TOKENS: ")
 compiler.tokens.print()
 print("\nErrors:")
 compiler.errors.print()
+print("\nSymbols:")
+compiler.symbol_table.print()
