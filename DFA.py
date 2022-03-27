@@ -13,6 +13,7 @@ class DFA:
             "symbol_sign": ";",
             "other_sign": "!",
             "whitespace_sign": "-",
+            "newline_sign": "_",
             "lookahead_sign": "*",
             "starting_node_id": 0,
         }
@@ -23,6 +24,11 @@ class DFA:
             "C": "COMMENT",
             "W": "WHITESPACE",
         }
+        self.error_names = {
+            "ErrI": "Invalid input",
+            "ErrC": "Unmatched comment",
+            "ErrN": "Invalid number",
+        }
         self.transition_table = None
         self.current_state_id = self.settings["starting_node_id"]
 
@@ -30,11 +36,21 @@ class DFA:
         states = dfa_json['states']
         self.transition_table = [None] * len(states)
         for state in states:
-            name = state['name'][1:] if state['name'][0] == self.settings['lookahead_sign'] else state['name']
+            should_go_back = state['name'][0] == self.settings['lookahead_sign']
+            is_error = state['name'].startswith("Err")
+            if should_go_back:
+                name = state['name'][1:]
+            else:
+                name = state['name']
+            if is_error:
+                name =self.error_names[name]
+            elif name in self.state_names:
+                name = self.state_names[name]
             self.transition_table[int(state['id'])] = {
-                "type": self.state_names[name] if name in self.state_names else name,
+                "type": name,
                 'end': bool(state['end']),
-                "should_go_back": state['name'][0] == self.settings['lookahead_sign'],
+                "is_error": is_error,
+                "should_go_back": should_go_back,
                 "transitions": {}  # Symbol: dest_id
             }
 
@@ -58,7 +74,9 @@ class DFA:
             return self.settings['alphabet_sign']
         if char in [';', ':', ',', '[', ']', '(', ')', '+', '-', '<']:
             return self.settings['symbol_sign']
-        if char in [' ', '\n', '\r', '\t', '\v', '\f']:
+        if char == "\n":
+            return self.settings['newline_sign']
+        if char in [' ', '\r', '\t', '\v', '\f']:
             return self.settings['whitespace_sign']
         return char
 
@@ -84,6 +102,9 @@ class DFA:
 
     def should_go_back(self):
         return self.transition_table[self.current_state_id]['should_go_back']
+    
+    def is_error(self):
+        return self.transition_table[self.current_state_id]['is_error']
 
     # for debuggin purposes only
     def print(self):

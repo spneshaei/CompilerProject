@@ -1,5 +1,7 @@
 {
     "alphabet": [
+        "_",
+        "#",
         "-",
         "!",
         "%",
@@ -65,8 +67,8 @@
             "id": 3,
             "name": "*N",
             "coord": {
-                "x": 117,
-                "y": 60
+                "x": 133,
+                "y": 49
             },
             "radius": 20,
             "end": true,
@@ -87,8 +89,8 @@
             "id": 5,
             "name": "S",
             "coord": {
-                "x": 163,
-                "y": 293
+                "x": 183,
+                "y": 408
             },
             "radius": 20,
             "end": true,
@@ -98,8 +100,8 @@
             "id": 6,
             "name": "6",
             "coord": {
-                "x": 220,
-                "y": 324
+                "x": 229,
+                "y": 496
             },
             "radius": 20,
             "end": false,
@@ -109,8 +111,8 @@
             "id": 7,
             "name": "7",
             "coord": {
-                "x": 103,
-                "y": 202
+                "x": 126,
+                "y": 344
             },
             "radius": 20,
             "end": false,
@@ -120,8 +122,8 @@
             "id": 8,
             "name": "*S",
             "coord": {
-                "x": 108,
-                "y": 399
+                "x": 123,
+                "y": 440
             },
             "radius": 20,
             "end": true,
@@ -153,8 +155,8 @@
             "id": 11,
             "name": "11",
             "coord": {
-                "x": 467,
-                "y": 242
+                "x": 554,
+                "y": 91
             },
             "radius": 20,
             "end": false,
@@ -188,6 +190,61 @@
             "coord": {
                 "x": 454,
                 "y": 515
+            },
+            "radius": 20,
+            "end": true,
+            "start": false
+        },
+        {
+            "id": 15,
+            "name": "15",
+            "coord": {
+                "x": 472,
+                "y": 258
+            },
+            "radius": 20,
+            "end": false,
+            "start": false
+        },
+        {
+            "id": 16,
+            "name": "*C",
+            "coord": {
+                "x": 549,
+                "y": 302
+            },
+            "radius": 20,
+            "end": true,
+            "start": false
+        },
+        {
+            "id": 17,
+            "name": "ErrN",
+            "coord": {
+                "x": 84,
+                "y": 220
+            },
+            "radius": 20,
+            "end": true,
+            "start": false
+        },
+        {
+            "id": 18,
+            "name": "ErrI",
+            "coord": {
+                "x": 45,
+                "y": 506
+            },
+            "radius": 20,
+            "end": true,
+            "start": false
+        },
+        {
+            "id": 19,
+            "name": "ErrC",
+            "coord": {
+                "x": 56,
+                "y": 296
             },
             "radius": 20,
             "end": true,
@@ -240,7 +297,8 @@
             "state_src_id": 0,
             "state_dst_id": 4,
             "symbols": [
-                "-"
+                "-",
+                "_"
             ]
         },
         {
@@ -280,7 +338,8 @@
             "state_src_id": 6,
             "state_dst_id": 8,
             "symbols": [
-                "!"
+                "-",
+                "_"
             ]
         },
         {
@@ -296,7 +355,8 @@
             "state_src_id": 7,
             "state_dst_id": 8,
             "symbols": [
-                "!"
+                "-",
+                "_"
             ]
         },
         {
@@ -378,6 +438,70 @@
             "state_dst_id": 14,
             "symbols": [
                 "!"
+            ]
+        },
+        {
+            "id": 23,
+            "state_src_id": 0,
+            "state_dst_id": 15,
+            "symbols": [
+                "#"
+            ]
+        },
+        {
+            "id": 24,
+            "state_src_id": 15,
+            "state_dst_id": 15,
+            "symbols": [
+                "!"
+            ]
+        },
+        {
+            "id": 25,
+            "state_src_id": 15,
+            "state_dst_id": 16,
+            "symbols": [
+                "_"
+            ]
+        },
+        {
+            "id": 26,
+            "state_src_id": 1,
+            "state_dst_id": 17,
+            "symbols": [
+                "@"
+            ]
+        },
+        {
+            "id": 27,
+            "state_src_id": 2,
+            "state_dst_id": 17,
+            "symbols": [
+                "@"
+            ]
+        },
+        {
+            "id": 28,
+            "state_src_id": 7,
+            "state_dst_id": 18,
+            "symbols": [
+                "!"
+            ]
+        },
+        {
+            "id": 29,
+            "state_src_id": 6,
+            "state_dst_id": 18,
+            "symbols": [
+                "!"
+            ]
+        },
+        {
+            "id": 30,
+            "state_src_id": 7,
+            "state_dst_id": 19,
+            "symbols": [
+                "/"
             ]
         }
     ]
