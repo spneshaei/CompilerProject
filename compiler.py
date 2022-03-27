@@ -8,15 +8,7 @@ class Compiler:
         self.look_ahead = False
         self.tokens = []
         self.symbol_table = SymbolTable()
-        self.keywords = [
-            'break',
-            'continue',
-            'def',
-            'else',
-            'if',
-            'return',
-            'while',
-        ]
+        
 
     def insert_token(self, token, type):
         self.tokens.append({"token": token, "type": type})
