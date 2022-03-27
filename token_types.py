@@ -16,7 +16,7 @@ class TokenTypes(enum.Enum):
     }
     SYMBOL = {
         "name": "SYMBOL",
-        "regex": ";|:|,|\\[|\\]|\\(|\\)|\\+|-|\\*|=|<|==|**"
+        "regex": ";|:|,|\\[|\\]|\\(|\\)|\\+|-|\\*|=|<|==|\\*\\*"
     }
     COMMENT = {
         "name":"COMMENT",

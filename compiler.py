@@ -19,16 +19,23 @@ class Compiler:
             self.end_of_file = True
         return c
     
+    def rewind_char(self):
+        self.file.seek(-1, 1)
+
+    def is_whitespace(self, char):
+        return char == " " or char == "\t" or char == "\n" or char == "\r" or char == "\v" or char == "\f"
+    
     def get_next_token(self):
         buffer = ""
-        token_type = None
         last_char = None
-        while (token_type == None):
+        while (not self.is_whitespace(last_char)):
             last_char = self.get_char()
             if (last_char == None):
-                return False
+                break
             buffer += last_char
-            token_type = self.tokens.get_token_type(buffer)
+        token_type = self.tokens.get_token_type(buffer)
+        if (token_type == None):
+            return False
         self.tokens.add_token(token_type, buffer, self.next_line)
         if (last_char == "\n"):
             self.next_line = True

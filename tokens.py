@@ -28,7 +28,8 @@ class Tokens:
     
     # for debugging purposes
     def print_tokens(self):
-        line_no = 1
+        line_no = 0
         for line in self.table:
+            line_no += 1
             for token in line:
-                print(line_no + ". <", token['type'], ", ", token['attribute'], ">")
+                print(str(line_no) + ". <", token['type'], ", ", token['attribute'], ">")
