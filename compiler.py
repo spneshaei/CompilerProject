@@ -39,7 +39,10 @@ class Compiler:
             last_char = self.get_char()
             if (last_char == None):
                 break
-            buffer += last_char
+            if (last_char == "\n"):
+                self.line_no += 1
+            else:
+                buffer += last_char
             if (not self.dfa.next_char(last_char)):
                 self.errors.add_error("Invalid input", buffer, self.line_no)
                 return True
@@ -57,9 +60,8 @@ class Compiler:
             token_type = "KEYWORD"
         else:
             token_type = self.dfa.get_type()
-        self.tokens.add_token(token_type, buffer, self.line_no)
-        if (last_char == "\n"):
-            self.line_no += 1
+        if (token_type != 'WHITESPACE' and token_type != 'COMMENT'):
+            self.tokens.add_token(token_type, buffer, self.line_no)
         return True
 
 

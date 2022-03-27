@@ -29,6 +29,7 @@ class DFA:
             "ErrC": "Unmatched comment",
             "ErrN": "Invalid number",
         }
+        self.alphabet = "[a-zA-Z0-9/\\*\\+-\\.;#:,\\[\\]\\(\\)=< \n\r\t\v\f]"
         self.transition_table = None
         self.current_state_id = self.settings["starting_node_id"]
 
@@ -84,6 +85,8 @@ class DFA:
         self.current_state_id = self.settings['starting_node_id']
 
     def next_char(self, input):
+        if (re.search(self.alphabet, input) == None):
+            return False
         input = self.get_symbol_of_char(input)
         current_state = self.transition_table[self.current_state_id]
         if input not in current_state['transitions']:
