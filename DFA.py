@@ -1,3 +1,4 @@
+import json
 from os import stat
 import re
 from matplotlib.font_manager import json_dump, json_load
@@ -32,7 +33,7 @@ class DFA:
             name = state['name'][1:] if state['name'][0] == self.settings['lookahead_sign'] else state['name']
             self.transition_table[int(state['id'])] = {
                 "type": self.state_names[name] if name in self.state_names else name,
-                'end': state['end'],
+                'end': bool(state['end']),
                 "should_go_back": state['name'][0] == self.settings['lookahead_sign'],
                 "transitions": {}  # Symbol: dest_id
             }
@@ -65,4 +66,26 @@ class DFA:
         self.current_state_id = self.settings['starting_node_id']
     
     def next_char(self, input):
-        pass
+        input = self.get_symbol_of_char(input)
+        current_state = self.transition_table[self.current_state_id]
+        if input not in current_state['transitions']:
+            if '!' in current_state['transitions']:
+                self.current_state_id = current_state['transitions']['!']
+            else:
+                pass #TODO: throw error
+        else:
+            self.current_state_id = current_state['transitions'][input]
+    
+    def is_finished(self):
+        return self.transition_table[self.current_state_id]['end']
+    
+    def get_type(self):
+        return self.transition_table[self.current_state_id]['type']
+    
+    def should_go_back(self):
+        return self.transition_table[self.current_state_id]['should_go_back']
+
+    # for debuggin purposes only
+    def print(self):
+        to_print = json.dumps(self.transition_table)
+        print(to_print)

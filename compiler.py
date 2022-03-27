@@ -1,3 +1,4 @@
+from DFA import DFA
 from symbol_table import SymbolTable
 from tokens import Tokens
 
@@ -49,4 +50,3 @@ while (True):
     if not compiler.get_next_token():
         break
 compiler.tokens.print_tokens()
-        
