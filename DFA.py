@@ -1,28 +1,39 @@
+from os import stat
 import re
 from matplotlib.font_manager import json_dump, json_load
 
 
 class DFA:
-    settings = {
-        "digit_sign": "%",
-        "alphabet_sign": "@",
-        "symbol_sign": ";",
-        "other_sign": "!",
-        "whitespace_sign": "-",
-        "lookahead_sign": "*", # TODO
-        "starting_node_id": 0,
-    }
 
     def __init__(self):
+        self.settings = {
+            "digit_sign": "%",
+            "alphabet_sign": "@",
+            "symbol_sign": ";",
+            "other_sign": "!",
+            "whitespace_sign": "-",
+            "lookahead_sign": "*", 
+            "starting_node_id": 0,
+        }
+        self.state_names = {
+            "N": "NUMBER",
+            "I": "ID",
+            "S": "SYMBOL",
+            "C": "COMMENT",
+            "W": "WHITESPACE",
+        }
         self.transition_table = None
+        self.current_state_id = self.settings["starting_node_id"]
 
     def load_states(self, dfa_json):
         states = dfa_json['states']
         self.transition_table = [None] * len(states)
         for state in states:
+            name = state['name'][1:] if state['name'][0] == self.settings['lookahead_sign'] else state['name']
             self.transition_table[int(state['id'])] = {
-                "name": state['name'],
+                "type": self.state_names[name] if name in self.state_names else name,
                 'end': state['end'],
+                "should_go_back": state['name'][0] == self.settings['lookahead_sign'],
                 "transitions": {}  # Symbol: dest_id
             }
 
@@ -49,3 +60,9 @@ class DFA:
         if char in [' ', '\n', '\r', '\t', '\v', '\f']:
             return self.settings['whitespace_sign']
         return char
+
+    def reset(self):
+        self.current_state_id = self.settings['starting_node_id']
+    
+    def next_char(self, input):
+        pass
