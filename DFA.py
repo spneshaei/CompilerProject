@@ -85,11 +85,11 @@ class DFA:
         self.current_state_id = self.settings['starting_node_id']
 
     def next_char(self, input):
-        # TODO: how about comments?!
-        if (re.search(self.alphabet, input) == None):
-            return False
-        input = self.get_symbol_of_char(input)
         current_state = self.transition_table[self.current_state_id]
+        if (re.search(self.alphabet, input) == None and current_state['type'] != 'COMMENT'):
+            return False
+        if (input not in self.settings.values() or current_state['type'] != 'COMMENT'):
+            input = self.get_symbol_of_char(input)
         if input not in current_state['transitions']:
             if '!' in current_state['transitions']:
                 self.current_state_id = current_state['transitions']['!']

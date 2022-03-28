@@ -4,7 +4,7 @@ def main ():
 	a = 2 + 2.5;
 	a = a - 3;
 	cde = a;
-	if (b/* comment2 */ == 3d):
+	if (b/* comment2 with _ */ == 3d):
 		a = 3;
 		cd!e = 7;
 	else */
