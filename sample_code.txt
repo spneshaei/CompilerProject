@@ -11,4 +11,4 @@ def main ():
 	: 25/
 		b = a < cde; *$
 		cde = @2; if/
-	return;/*comment3
+	return;/* comment 3

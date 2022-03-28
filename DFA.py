@@ -85,6 +85,7 @@ class DFA:
         self.current_state_id = self.settings['starting_node_id']
 
     def next_char(self, input):
+        # TODO: how about comments?!
         if (re.search(self.alphabet, input) == None):
             return False
         input = self.get_symbol_of_char(input)

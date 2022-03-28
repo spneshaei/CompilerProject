@@ -37,7 +37,7 @@ class Compiler:
         self.dfa.reset()
         while (not self.dfa.is_finished()):
             last_char = self.get_char()
-            if (last_char == None):
+            if (last_char == None or last_char == ''):
                 break
             if (last_char != "\n"):
                 buffer += last_char
@@ -56,7 +56,10 @@ class Compiler:
             self.errors.add_error(self.dfa.get_type(), buffer, self.line_no)
             return True
         if not self.dfa.is_finished():
-            # TODO: maybe unclosed comment error?
+            message = buffer[0:min(10, len(buffer))]
+            if len(buffer) > 10:
+                message += "..."
+            self.errors.add_error("Unclosed comment", message, self.line_no)
             return False
         if (buffer in self.symbol_table.keywords):
             token_type = "KEYWORD"
