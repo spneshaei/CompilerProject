@@ -82,5 +82,4 @@ while (True):
 compiler.tokens.write_to_file()
 print("\nErrors:")
 compiler.errors.print()
-print("\nSymbols:")
-compiler.symbol_table.print()
+compiler.symbol_table.write_to_file()

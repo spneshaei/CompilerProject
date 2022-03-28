@@ -17,3 +17,15 @@ class SymbolTable:
         for lexeme in self.table:
             print(index, ". ", lexeme)
             index += 1
+    
+    def write_to_file(self):
+        to_write = ""
+        index = 1
+        table = self.keywords + self.table
+        for item in table:
+            to_write += str(index) + ".\t" + item + "\n"
+            index += 1
+        to_write = to_write[:-1]
+        with open('symbol_table.txt', 'w') as file:
+            file.write(to_write)
+            file.close()
