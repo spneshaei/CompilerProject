@@ -16,17 +16,23 @@ class Scanner:
         self.dfa.generate('DFA.json')
         self.errors = Errors()
         self.line_no = 1
+        self.is_rewinded = False
+        self.lookahead_char = None
 
     def get_char(self):
+        if self.is_rewinded:
+            self.is_rewinded = False
+            return self.lookahead_char
         if (self.end_of_file):
             return None
         c = self.file.read(1)
+        self.lookahead_char = c
         if not c:
             self.end_of_file = True
         return c
 
     def rewind_char(self):
-        self.file.seek(self.file.tell() - 1)
+        self.is_rewinded = True
 
     def is_whitespace(self, char):
         return char == " " or char == "\t" or char == "\n" or char == "\r" or char == "\v" or char == "\f"
@@ -37,6 +43,8 @@ class Scanner:
         self.dfa.reset()
         while (not self.dfa.is_finished()):
             last_char = self.get_char()
+            if (last_char == 'b'):
+                pass
             if (last_char == None):
                 break
             if (last_char == ''):
