@@ -281,7 +281,12 @@
             "state_src_id": 2,
             "state_dst_id": 3,
             "symbols": [
-                "!"
+                ";",
+                "=",
+                "*",
+                "/",
+                "_",
+                "?"
             ]
         },
         {
@@ -480,7 +485,7 @@
             "state_src_id": 2,
             "state_dst_id": 17,
             "symbols": [
-                "@"
+                "!"
             ]
         },
         {

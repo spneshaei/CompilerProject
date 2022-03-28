@@ -8,8 +8,6 @@ class Scanner:
     def __init__(self, code_file):
         self.file = open(code_file)
         self.end_of_file = False
-        self.look_ahead = False
-        self.next_line = False
         self.symbol_table = SymbolTable()
         self.tokens = Tokens()
         self.dfa = DFA()
@@ -43,8 +41,6 @@ class Scanner:
         self.dfa.reset()
         while (not self.dfa.is_finished()):
             last_char = self.get_char()
-            if (last_char == 'b'):
-                pass
             if (last_char == None):
                 break
             if (last_char == ''):

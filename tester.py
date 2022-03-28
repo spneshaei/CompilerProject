@@ -1,6 +1,4 @@
-import filecmp
 import os
-from time import sleep
 
 
 def file_equal(file1, file2):
