@@ -38,7 +38,7 @@ class DFA:
         self.transition_table = [None] * len(states)
         for state in states:
             should_go_back = state['name'][0] == self.settings['lookahead_sign']
-            is_error = state['name'].startswith("Err")
+            is_error = state['name'].startswith("Err") or state['name'].startswith("*Err")
             if should_go_back:
                 name = state['name'][1:]
             else:
