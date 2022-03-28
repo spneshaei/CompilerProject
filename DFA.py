@@ -86,9 +86,9 @@ class DFA:
 
     def next_char(self, input):
         current_state = self.transition_table[self.current_state_id]
-        if (re.search(self.alphabet, input) == None and current_state['type'] != 'COMMENT'):
+        if (re.search(self.alphabet, input) == None and current_state['type'] != 'COMMENT' and current_state['type'] != 'NUMBER'):
             return False
-        if (input not in self.settings.values() or current_state['type'] != 'COMMENT'):
+        if (input not in self.settings.values()): #or current_state['type'] != 'COMMENT'):
             input = self.get_symbol_of_char(input)
         if input not in current_state['transitions']:
             if '!' in current_state['transitions']:

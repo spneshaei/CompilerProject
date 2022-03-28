@@ -40,7 +40,7 @@ class Compiler:
             if (last_char == None):
                 break
             if (last_char == ''):
-                last_char = ' '
+                last_char = '\n'
             if (last_char != "\n"):
                 buffer += last_char
             if (not self.dfa.next_char(last_char)):
@@ -59,10 +59,11 @@ class Compiler:
             self.errors.add_error(self.dfa.get_type(), buffer, self.line_no)
             return True
         if not self.dfa.is_finished():
-            message = buffer[0:min(10, len(buffer))]
-            if len(buffer) > 10:
-                message += "..."
-            self.errors.add_error("Unclosed comment", message, self.line_no)
+            if self.dfa.get_type() == "COMMENT":
+                message = buffer[0:min(10, len(buffer))]
+                if len(buffer) > 10:
+                    message += "..."
+                self.errors.add_error("Unclosed comment", message, self.line_no)
             return False
         if (buffer in self.symbol_table.keywords):
             token_type = "KEYWORD"
@@ -80,6 +81,5 @@ while (True):
     if not compiler.get_next_token():
         break
 compiler.tokens.write_to_file()
-print("\nErrors:")
-compiler.errors.print()
+compiler.errors.write_to_file()
 compiler.symbol_table.write_to_file()
