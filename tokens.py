@@ -1,7 +1,4 @@
 import re
-from matplotlib.font_manager import json_load
-
-from matplotlib.pyplot import table
 from token_types import TokenTypes
 
 

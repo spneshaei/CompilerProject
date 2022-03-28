@@ -1,7 +1,5 @@
 import json
-from os import stat
 import re
-from matplotlib.font_manager import json_dump, json_load
 
 
 class DFA:
@@ -64,9 +62,11 @@ class DFA:
                 self.transition_table[src_id]['transitions'][symbol] = dest_id
 
     def generate(self, file_name):
-        dfa_json = json_load(file_name)
+        file = open(file_name, 'r')
+        dfa_json = json.load(file)
         self.load_states(dfa_json)
         self.load_transitions(dfa_json)
+        file.close()
 
     def get_symbol_of_char(self, char):
         if(char >= '0' and char <= '9'):
