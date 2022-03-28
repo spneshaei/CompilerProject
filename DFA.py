@@ -12,7 +12,7 @@ class DFA:
             "alphabet_sign": "@",
             "symbol_sign": ";",
             "other_sign": "!",
-            "whitespace_sign": "-",
+            "whitespace_sign": "?",
             "newline_sign": "_",
             "lookahead_sign": "*",
             "starting_node_id": 0,
