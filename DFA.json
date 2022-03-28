@@ -230,17 +230,6 @@
         },
         {
             "id": 18,
-            "name": "ErrI",
-            "coord": {
-                "x": 45,
-                "y": 506
-            },
-            "radius": 20,
-            "end": true,
-            "start": false
-        },
-        {
-            "id": 19,
             "name": "ErrC",
             "coord": {
                 "x": 56,
@@ -338,8 +327,7 @@
             "state_src_id": 6,
             "state_dst_id": 8,
             "symbols": [
-                "-",
-                "_"
+                "!"
             ]
         },
         {
@@ -355,8 +343,7 @@
             "state_src_id": 7,
             "state_dst_id": 8,
             "symbols": [
-                "-",
-                "_"
+                "!"
             ]
         },
         {
@@ -484,22 +471,6 @@
             "id": 28,
             "state_src_id": 7,
             "state_dst_id": 18,
-            "symbols": [
-                "!"
-            ]
-        },
-        {
-            "id": 29,
-            "state_src_id": 6,
-            "state_dst_id": 18,
-            "symbols": [
-                "!"
-            ]
-        },
-        {
-            "id": 30,
-            "state_src_id": 7,
-            "state_dst_id": 19,
             "symbols": [
                 "/"
             ]

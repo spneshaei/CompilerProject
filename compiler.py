@@ -37,8 +37,10 @@ class Compiler:
         self.dfa.reset()
         while (not self.dfa.is_finished()):
             last_char = self.get_char()
-            if (last_char == None or last_char == ''):
+            if (last_char == None):
                 break
+            if (last_char == ''):
+                last_char = ' '
             if (last_char != "\n"):
                 buffer += last_char
             if (not self.dfa.next_char(last_char)):
@@ -47,7 +49,8 @@ class Compiler:
                     self.line_no += 1
                 return True
         if self.dfa.should_go_back():
-            buffer = buffer[:-1]
+            if last_char != '\n':
+                buffer = buffer[:-1]
             self.rewind_char()
             last_char = None
         if (last_char == "\n"):
@@ -76,8 +79,7 @@ compiler = Compiler("sample_code.txt")
 while (True):
     if not compiler.get_next_token():
         break
-print("TOKENS: ")
-compiler.tokens.print()
+compiler.tokens.write_to_file()
 print("\nErrors:")
 compiler.errors.print()
 print("\nSymbols:")
