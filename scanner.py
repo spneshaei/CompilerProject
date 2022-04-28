@@ -36,6 +36,8 @@ class Scanner:
         return char == " " or char == "\t" or char == "\n" or char == "\r" or char == "\v" or char == "\f"
 
     def get_next_token(self):
+        if (self.end_of_file):
+            return "$"
         buffer = ""
         last_char = None
         self.dfa.reset()
@@ -51,7 +53,7 @@ class Scanner:
                 self.errors.add_error("Invalid input", buffer, self.line_no)
                 if (last_char == "\n"):
                     self.line_no += 1
-                return True
+                return None
         if self.dfa.should_go_back():
             if last_char != '\n':
                 buffer = buffer[:-1]
@@ -61,14 +63,14 @@ class Scanner:
             self.line_no += 1
         if self.dfa.is_error():
             self.errors.add_error(self.dfa.get_type(), buffer, self.line_no)
-            return True
+            return None
         if not self.dfa.is_finished():
             if self.dfa.get_type() == "COMMENT":
                 message = buffer[0:min(10, len(buffer))]
                 if len(buffer) > 10:
                     message += "..."
                 self.errors.add_error("Unclosed comment", message, self.line_no)
-            return False
+            return None
         if (buffer in self.symbol_table.keywords):
             token_type = "KEYWORD"
         else:
@@ -77,4 +79,6 @@ class Scanner:
             self.tokens.add_token(token_type, buffer, self.line_no)
         if (token_type == 'ID'):
             self.symbol_table.add_symbol(buffer)
-        return True
+        if (token_type == 'SYMBOL'):
+            return buffer
+        return token_type

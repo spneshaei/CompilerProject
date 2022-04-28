@@ -1,11 +1,12 @@
-from parse_table import is_non_terminal
+from parse_table import ParseTable
+
 class Node:
     name = ''
     is_terminal = False
 
     def __init__(self, name):
         self.name = name
-        self.is_terminal = not is_non_terminal(name)
+        self.is_terminal = not ParseTable.is_non_terminal(name)
         if (not self.is_terminal):
             self.children = []
 

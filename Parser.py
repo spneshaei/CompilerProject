@@ -1,5 +1,5 @@
 from parse_table import *
-from DataStructures.Node import Node
+from Node import Node
 from scanner import Scanner
 
 
@@ -27,18 +27,21 @@ class Parser:
 
     def read_input(self):
         self.next_token = self.scanner.get_next_token()
+        while self.next_token == None or self.next_token == 'WHITESPACE' or self.next_token == 'COMMENT':
+            self.next_token = self.scanner.get_next_token()
 
     def parse(self):
-        # TODO: change scanner to return next token and $ at end
         self.read_input()
         while True:
             self.pop_from_stack()
             if (self.current_node.is_terminal):
                 self.read_input()
+                while self.next_token == None or self.next_token == 'WHITESPACE' or self.next_token == 'COMMENT':
+                    self.read_input()
                 if (self.next_token == "$"):
                     break  # TODO: shall we do something here?
             else:
-                children = parse_table_lookup(self.current_node, self.next_token)
+                children = ParseTable.lookup(self.current_node, self.next_token)
                 if (children[0] == ""):
                     pass # TODO: handle errors
                 elif (children[0] == "@"):
