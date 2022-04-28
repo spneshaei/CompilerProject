@@ -16,7 +16,7 @@ class DFA:
             "starting_node_id": 0,
         }
         self.state_names = {
-            "N": "NUMBER",
+            "N": "NUM",
             "I": "ID",
             "S": "SYMBOL",
             "C": "COMMENT",

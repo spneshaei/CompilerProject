@@ -1,3 +1,4 @@
+import json
 from parse_table import *
 from Node import Node
 from scanner import Scanner
@@ -42,9 +43,17 @@ class Parser:
                     break  # TODO: shall we do something here?
             else:
                 children = ParseTable.lookup(self.current_node, self.next_token)
-                if (children[0] == ""):
+                if (children == None):
                     pass # TODO: handle errors
                 elif (children[0] == "@"):
                     pass # TODO: handle synch
                 else:
                     self.push_multiple_to_stack(children)
+    
+    def print_parse_tree(self):
+        with open("parse_tree.json") as output:
+            txt = self.parse_tree.print()
+            print(txt)
+            # output.write(txt)
+            output.close()
+

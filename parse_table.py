@@ -248,4 +248,6 @@ class ParseTable:
         return lexeme in non_terminals
 
     def lookup(node, token: str):
+        if (node.get_name() not in parse_table or token not in parse_table[node.get_name()]):
+            return None
         return parse_table[node.get_name()][token]
