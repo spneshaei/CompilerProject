@@ -1,6 +1,9 @@
 # Usage: parse_table['Program']['return']
 # @ means synch
 
+from DataStructures.Node import Node
+
+
 parse_table = {
     'Program': {
         'break': ['Statements'],
@@ -245,3 +248,6 @@ start_symbol = 'Program'
 
 def is_non_terminal(lexeme):
     return lexeme in non_terminals
+
+def parse_table_lookup(node: Node, token: str):
+    return parse_table[node.get_name][token]
