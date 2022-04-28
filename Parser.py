@@ -30,6 +30,7 @@ class Parser:
 
     def parse(self):
         # TODO: change scanner to return next token and $ at end
+        self.read_input()
         while True:
             self.pop_from_stack()
             if (self.current_node.is_terminal):
