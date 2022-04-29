@@ -32,15 +32,18 @@ class Parser:
             self.next_token = self.scanner.get_next_token()
 
     def parse(self):
+        self.parse_tree.add_child(Node("$"))
         self.read_input()
         while True:
+            if (len(self.stack) == 0):
+                break
             self.pop_from_stack()
             if (self.current_node.is_terminal):
                 if (self.current_node.name != 'epsilon'):
                     self.current_node.set_data(self.next_token[1])
                     self.read_input()
-                if (self.next_token == "$"):
-                    break  # TODO: shall we do something here?
+                # if (self.next_token == "$"):
+                    # break  # TODO: shall we do something here?
             else:
                 children = ParseTable.lookup(self.current_node, self.next_token)
                 if (children == None):

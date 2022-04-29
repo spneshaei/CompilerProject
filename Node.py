@@ -37,7 +37,7 @@ class Node:
 
     def print(self):
         if (self.is_terminal):
-            if (self.name == 'epsilon'):
+            if (self.name == 'epsilon' or self.name == '$'):
                 return self.name
             return "(" + self.name + ", " + self.data + ")"
         result = self.name + "\n"
