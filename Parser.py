@@ -28,7 +28,7 @@ class Parser:
 
     def read_input(self):
         self.next_token = self.scanner.get_next_token()
-        while self.next_token == None or self.next_token == 'WHITESPACE' or self.next_token == 'COMMENT':
+        while self.next_token == None or self.next_token[0] == 'WHITESPACE' or self.next_token[0] == 'COMMENT':
             self.next_token = self.scanner.get_next_token()
 
     def parse(self):
@@ -36,8 +36,8 @@ class Parser:
         while True:
             self.pop_from_stack()
             if (self.current_node.is_terminal):
-                self.read_input()
-                while self.next_token == None or self.next_token == 'WHITESPACE' or self.next_token == 'COMMENT':
+                if (self.current_node.name != 'epsilon'):
+                    self.current_node.set_data(self.next_token[1])
                     self.read_input()
                 if (self.next_token == "$"):
                     break  # TODO: shall we do something here?

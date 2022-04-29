@@ -4,6 +4,7 @@ from parse_table import ParseTable
 
 class Node:
     name = ''
+    data = ''
     is_terminal = False
 
     def __init__(self, name):
@@ -13,6 +14,15 @@ class Node:
             self.name = 'epsilon'
         if (not self.is_terminal):
             self.children = []
+
+    def set_data(self, data):
+        if (not self.is_terminal):
+            raise Exception("Cannot add data to non-terminal")
+        if (ParseTable.is_symbol(self.name)):
+            self.data = self.name
+            self.name = "SYMBOL"
+        else:
+            self.data = data
 
     def add_child(self, child):
         self.children.append(child)
@@ -25,10 +35,11 @@ class Node:
     def get_name(self):
         return self.name
 
-    
     def print(self):
         if (self.is_terminal):
-            return self.name
+            if (self.name == 'epsilon'):
+                return self.name
+            return "(" + self.name + ", " + self.data + ")"
         result = self.name + "\n"
         for child_index in range(len(self.children) - 1, -1, -1):
             child = self.children[child_index]

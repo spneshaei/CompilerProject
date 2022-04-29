@@ -79,6 +79,4 @@ class Scanner:
             self.tokens.add_token(token_type, buffer, self.line_no)
         if (token_type == 'ID'):
             self.symbol_table.add_symbol(buffer)
-        if (token_type == 'SYMBOL'):
-            return buffer
-        return token_type
+        return (token_type, buffer)

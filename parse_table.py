@@ -1,6 +1,7 @@
 # Usage: parse_table['Program']['return']
 # @ means synch
 
+
 parse_table = {
     'Program': {
         'break': ['Statements'],
@@ -241,13 +242,20 @@ parse_table = {
 }
 
 non_terminals = ['Program', 'Statements', 'Statement', 'Simple_stmt', 'Compound_stmt', 'Assignment_Call', 'B', 'C', 'List_Rect', 'Return_stmt', 'Return_Value', 'Global_stmt', 'Function_def', 'Params', 'Params_Prime', 'If_stmt', 'Else_block', 'Iteration_stmt', 'Relational_Expression', 'Relop', 'Expression', 'Expression_Prime', 'Term', 'Term_Prime', 'Factor', 'Power', 'Primary', 'Arguments', 'Arguments_Prime', 'Atom']
+symbols = [';', ':', ',', '[', ']', '(', ')', '+', '-', '<', "=", "*", "==", "**"]
 start_symbol = 'Program'
 
 class ParseTable:
     def is_non_terminal(lexeme):
         return lexeme in non_terminals
+    
+    def is_symbol(lexeme):
+        return lexeme in symbols
 
-    def lookup(node, token: str):
-        if (node.get_name() not in parse_table or token not in parse_table[node.get_name()]):
+    def lookup(node, token):
+        token_value = token[0]
+        if (token_value == "SYMBOL"):
+            token_value = token[1]
+        if (node.get_name() not in parse_table or token_value not in parse_table[node.get_name()]):
             return None
-        return parse_table[node.get_name()][token]
+        return parse_table[node.get_name()][token_value]
