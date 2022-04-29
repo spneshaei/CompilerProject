@@ -39,11 +39,9 @@ class Parser:
                 break
             self.pop_from_stack()
             if (self.current_node.is_terminal):
-                if (self.current_node.name != 'epsilon'):
+                if (self.current_node.name != 'epsilon' and self.next_token != "$"):
                     self.current_node.set_data(self.next_token[1])
                     self.read_input()
-                # if (self.next_token == "$"):
-                    # break  # TODO: shall we do something here?
             else:
                 children = ParseTable.lookup(self.current_node, self.next_token)
                 if (children == None):
@@ -54,9 +52,8 @@ class Parser:
                     self.push_multiple_to_stack(children)
     
     def print_parse_tree(self):
-        with open("parse_tree.json") as output:
+        with open("parse_tree.txt", "w") as output:
             txt = self.parse_tree.print()
-            print(txt)
-            # output.write(txt)
+            output.write(txt)
             output.close()
 

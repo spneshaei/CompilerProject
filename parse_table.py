@@ -241,8 +241,9 @@ parse_table = {
     }
 }
 
-non_terminals = ['Program', 'Statements', 'Statement', 'Simple_stmt', 'Compound_stmt', 'Assignment_Call', 'B', 'C', 'List_Rect', 'Return_stmt', 'Return_Value', 'Global_stmt', 'Function_def', 'Params', 'Params_Prime', 'If_stmt', 'Else_block', 'Iteration_stmt', 'Relational_Expression', 'Relop', 'Expression', 'Expression_Prime', 'Term', 'Term_Prime', 'Factor', 'Power', 'Primary', 'Arguments', 'Arguments_Prime', 'Atom']
+non_terminals = ['Program', 'Statements', 'Statement', 'Simple_stmt', 'Compound_stmt', 'Assignment_Call', 'B', 'C', 'List_Rest', 'Return_stmt', 'Return_Value', 'Global_stmt', 'Function_def', 'Params', 'Params_Prime', 'If_stmt', 'Else_block', 'Iteration_stmt', 'Relational_Expression', 'Relop', 'Expression', 'Expression_Prime', 'Term', 'Term_Prime', 'Factor', 'Power', 'Primary', 'Arguments', 'Arguments_Prime', 'Atom']
 symbols = [';', ':', ',', '[', ']', '(', ')', '+', '-', '<', "=", "*", "==", "**"]
+keywords = ["break", "continue", "def", "else", "if", "return", "while"]
 start_symbol = 'Program'
 
 class ParseTable:
@@ -252,9 +253,12 @@ class ParseTable:
     def is_symbol(lexeme):
         return lexeme in symbols
 
+    def is_keyword(lexeme):
+        return lexeme in keywords
+
     def lookup(node, token):
         token_value = token[0]
-        if (token_value == "SYMBOL"):
+        if (token_value == "SYMBOL" or token_value == "KEYWORD"):
             token_value = token[1]
         if (node.get_name() not in parse_table or token_value not in parse_table[node.get_name()]):
             return None

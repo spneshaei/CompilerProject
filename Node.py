@@ -21,6 +21,9 @@ class Node:
         if (ParseTable.is_symbol(self.name)):
             self.data = self.name
             self.name = "SYMBOL"
+        elif (ParseTable.is_keyword(self.name)):
+            self.data = self.name
+            self.name = "KEYWORD"
         else:
             self.data = data
 
@@ -49,7 +52,7 @@ class Node:
             result += child_result[0] + "\n"
             for line in child_result[1:]:
                 if (has_next_child):
-                    result += "|   " + line + "\n"
+                    result += "│   " + line + "\n"
                 else:
                     result += "    " + line + "\n"
         result = result[:-1]
