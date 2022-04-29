@@ -9,9 +9,35 @@ class Parser:
     current_node = parse_tree
     next_token = ''
     stack = [parse_tree]
+    errors = []
 
     def __init__(self, scanner: Scanner):
         self.scanner = scanner
+
+    def add_error(self, type):
+        lineno = self.scanner.get_line_no()
+        if (type == 1):
+            if (self.next_token[0] == "SYMBOL" or self.next_token[0] == "KEYWORD"):
+                self.errors.append(f"{lineno} : syntax error, illegal {self.next_token[1]}")
+            else:
+                self.errors.append(f"{lineno} : syntax error, illegal {self.next_token[0]}")
+        elif (type == 2):
+            self.errors.append(f"{lineno} : syntax error, missing {self.current_node.get_name()} on line {lineno}")
+        elif (type == 3):
+            self.errors.append(f"{lineno} : syntax error, missing {self.current_node.get_name()}")
+    
+    def write_errors_to_file(self):
+        to_write = "There is no syntax error."
+        if (len(self.errors) != 0):
+            to_write = ''
+            for error in self.errors:
+                to_write += error + "\n"
+            to_write = to_write[:-1]
+        with open("syntax_errors.txt", "w") as errors_file:
+            errors_file.write(to_write)
+            errors_file.close()
+
+
 
     def push_to_stack(self, item: Node):
         self.stack.append(item)
@@ -41,7 +67,7 @@ class Parser:
             if (self.current_node.is_terminal):
                 if (self.current_node.name != 'epsilon'):
                     if (not self.current_node.terminal_equals(self.next_token)):
-                        # TODO: save error
+                        self.add_error(type=3)
                         self.current_node.get_parent().remove_child(self.current_node)
                         continue
                     if (self.next_token != "$"):
@@ -50,11 +76,11 @@ class Parser:
             else:
                 children = ParseTable.lookup(self.current_node, self.next_token)
                 while (children == None):
+                    self.add_error(type=1)
                     self.read_input()
                     children = ParseTable.lookup(self.current_node, self.next_token)
-                    # TODO: save error in file
                 if (children[0] == "@"):
-                    # TODO: save error in file
+                    self.add_error(type=2)
                     self.current_node.get_parent().remove_child(self.current_node)
                     continue
                 else:

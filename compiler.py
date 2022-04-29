@@ -18,6 +18,7 @@ class Compiler:
     def parse(self):
         self.parser.parse()
         self.parser.print_parse_tree()
+        self.parser.write_errors_to_file()
 
     def compile(self):
         pass
