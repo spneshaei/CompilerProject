@@ -47,11 +47,14 @@ class Node:
     
     def terminal_equals(self, terminal):
         if (terminal == "$"):
-            return False
+            return self.name == "$"
         if (ParseTable.is_symbol(self.name) or ParseTable.is_keyword(self.name)):
             return terminal[1] == self.name
         else:
             return terminal[0] == self.name
+    
+    def remove_first_child(self):
+        self.children.remove(self.children[0])
 
     def print(self):
         if (self.is_terminal):

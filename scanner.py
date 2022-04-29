@@ -48,8 +48,8 @@ class Scanner:
             last_char = self.get_char()
             if (last_char == None):
                 break
-            if (last_char == ''):
-                last_char = '\n'
+            # if (last_char == ''):
+            #     last_char = '\n'
             if (last_char != "\n"):
                 buffer += last_char
             if (not self.dfa.next_char(last_char)):

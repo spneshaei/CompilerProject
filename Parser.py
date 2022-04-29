@@ -18,13 +18,15 @@ class Parser:
         lineno = self.scanner.get_line_no()
         if (type == 1):
             if (self.next_token[0] == "SYMBOL" or self.next_token[0] == "KEYWORD"):
-                self.errors.append(f"{lineno} : syntax error, illegal {self.next_token[1]}")
+                self.errors.append(f"#{lineno} : syntax error, illegal {self.next_token[1]}")
             else:
-                self.errors.append(f"{lineno} : syntax error, illegal {self.next_token[0]}")
+                self.errors.append(f"#{lineno} : syntax error, illegal {self.next_token[0]}")
         elif (type == 2):
-            self.errors.append(f"{lineno} : syntax error, missing {self.current_node.get_name()} on line {lineno}")
+            self.errors.append(f"#{lineno} : syntax error, missing {self.current_node.get_name()} on line {lineno}")
         elif (type == 3):
-            self.errors.append(f"{lineno} : syntax error, missing {self.current_node.get_name()}")
+            self.errors.append(f"#{lineno} : syntax error, missing {self.current_node.get_name()}")
+        elif (type == 4):
+            self.errors.append(f"#{lineno} : syntax error, Unexpected EOF")
     
     def write_errors_to_file(self):
         to_write = "There is no syntax error."
@@ -76,15 +78,21 @@ class Parser:
             else:
                 children = ParseTable.lookup(self.current_node, self.next_token)
                 while (children == None):
+                    if (self.next_token == "$"):
+                        self.add_error(type=4)
+                        self.parse_tree.remove_first_child()
+                        self.current_node.get_parent().remove_child(self.current_node)
+                        break
                     self.add_error(type=1)
                     self.read_input()
                     children = ParseTable.lookup(self.current_node, self.next_token)
-                if (children[0] == "@"):
-                    self.add_error(type=2)
-                    self.current_node.get_parent().remove_child(self.current_node)
-                    continue
-                else:
-                    self.push_multiple_to_stack(children)
+                if (children != None):
+                    if (children[0] == "@"):
+                        self.add_error(type=3) # Should be 2
+                        self.current_node.get_parent().remove_child(self.current_node)
+                        continue
+                    else:
+                        self.push_multiple_to_stack(children)
     
     def print_parse_tree(self):
         with open("parse_tree.txt", "w") as output:
