@@ -35,6 +35,9 @@ class Scanner:
     def is_whitespace(self, char):
         return char == " " or char == "\t" or char == "\n" or char == "\r" or char == "\v" or char == "\f"
 
+    def get_line_no(self):
+        return self.line_no
+
     def get_next_token(self):
         if (self.end_of_file):
             return "$"

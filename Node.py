@@ -7,7 +7,8 @@ class Node:
     data = ''
     is_terminal = False
 
-    def __init__(self, name):
+    def __init__(self, name, parent):
+        self.parent = parent
         self.name = name
         self.is_terminal = not ParseTable.is_non_terminal(name)
         if (self.name == ''):
@@ -30,13 +31,27 @@ class Node:
     def add_child(self, child):
         self.children.append(child)
 
+    def remove_child(self, child):
+        self.children.remove(child)
+
     def get_children(self):
         if (self.is_terminal):
             raise Exception("Terminal has no children")
         return self.children
 
+    def get_parent(self):
+        return self.parent
+
     def get_name(self):
         return self.name
+    
+    def terminal_equals(self, terminal):
+        if (terminal == "$"):
+            return False
+        if (ParseTable.is_symbol(self.name) or ParseTable.is_keyword(self.name)):
+            return terminal[1] == self.name
+        else:
+            return terminal[0] == self.name
 
     def print(self):
         if (self.is_terminal):
