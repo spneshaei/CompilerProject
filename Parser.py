@@ -81,8 +81,10 @@ class Parser:
                     if (self.next_token == "$"):
                         self.add_error(type=4)
                         self.parse_tree.remove_first_child()
-                        self.current_node.get_parent().remove_child(self.current_node)
-                        break
+                        self.current_node.prune_branch()
+                        # self.current_node.get_parent().remove_child(self.current_node)
+                        return
+                        # break
                     self.add_error(type=1)
                     self.read_input()
                     children = ParseTable.lookup(self.current_node, self.next_token)
