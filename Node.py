@@ -56,14 +56,6 @@ class Node:
     def remove_first_child(self):
         self.children.remove(self.children[0])
 
-    def prune_branch(self):
-        parent = self.parent
-        child = self
-        while (parent != None):
-            parent.remove_child(child)
-            child = parent
-            parent = parent.parent
-
     def print(self):
         if (self.is_terminal):
             if (self.name == 'epsilon' or self.name == '$'):

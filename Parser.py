@@ -54,6 +54,13 @@ class Parser:
     def pop_from_stack(self):
         self.current_node = self.stack.pop()
 
+    def empty_stack(self):
+        self.current_node.parent.remove_child(self.current_node)
+        while (len(self.stack) != 0):
+            self.pop_from_stack()
+            self.current_node.parent.remove_child(self.current_node)
+
+
     def read_input(self):
         self.next_token = self.scanner.get_next_token()
         while self.next_token == None or self.next_token[0] == 'WHITESPACE' or self.next_token[0] == 'COMMENT':
@@ -81,10 +88,8 @@ class Parser:
                     if (self.next_token == "$"):
                         self.add_error(type=4)
                         self.parse_tree.remove_first_child()
-                        self.current_node.prune_branch()
-                        # self.current_node.get_parent().remove_child(self.current_node)
+                        self.empty_stack()
                         return
-                        # break
                     self.add_error(type=1)
                     self.read_input()
                     children = ParseTable.lookup(self.current_node, self.next_token)
