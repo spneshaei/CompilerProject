@@ -16,7 +16,7 @@ parse_table = {
     },
     'Statements': {
         ';': [''],
-        'break': ['Statement', ';', 'Statements'], # Revision: break or Statements?
+        'break': ['Statement', ';', 'Statements'],
         'continue': ['Statement', ';', 'Statements'],
         'ID': ['Statement', ';', 'Statements'],
         'return': ['Statement', ';', 'Statements'],
@@ -80,7 +80,6 @@ parse_table = {
         ';': [''],
         'ID': ['Expression'],
         'NUM': ['Expression'],
-        ':': ['@'] # Revision: ; or : ?!
     },
     'Global_stmt': {
         'global': ['global', 'ID'],

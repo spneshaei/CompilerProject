@@ -1,3 +1,6 @@
+# Seyed Parsa Neshaei - 98106134
+# Mohammad Taha Jahani-Nezhad - 98101363
+
 from Parser import Parser
 from scanner import Scanner
 
