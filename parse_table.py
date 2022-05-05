@@ -137,7 +137,6 @@ parse_table = {
         ']': [''],
         ')': [''],
         ',': [''],
-        'if': [''],
         '==': [''],
         '<': [''],
         '+': ['+', 'Term', 'Expression_Prime'],
@@ -242,7 +241,7 @@ parse_table = {
 
 non_terminals = ['Program', 'Statements', 'Statement', 'Simple_stmt', 'Compound_stmt', 'Assignment_Call', 'B', 'C', 'List_Rest', 'Return_stmt', 'Return_Value', 'Global_stmt', 'Function_def', 'Params', 'Params_Prime', 'If_stmt', 'Else_block', 'Iteration_stmt', 'Relational_Expression', 'Relop', 'Expression', 'Expression_Prime', 'Term', 'Term_Prime', 'Factor', 'Power', 'Primary', 'Arguments', 'Arguments_Prime', 'Atom']
 symbols = [';', ':', ',', '[', ']', '(', ')', '+', '-', '<', "=", "*", "==", "**"]
-keywords = ["break", "continue", "def", "else", "if", "return", "while"]
+keywords = ["break", "continue", "def", "else", "if", "return", "while", "global"]
 start_symbol = 'Program'
 
 class ParseTable:
