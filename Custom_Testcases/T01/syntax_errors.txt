@@ -1,9 +1,0 @@
-#6 : syntax error, illegal ID
-#6 : syntax error, missing B
-#8 : syntax error, illegal +
-#9 : syntax error, illegal [
-#9 : syntax error, missing ;
-#9 : syntax error, illegal ,
-#9 : syntax error, illegal ]
-#9 : syntax error, missing B
-#10 : syntax error, missing ;

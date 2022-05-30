@@ -1,12 +1,28 @@
 class SymbolTable:
+
+    instance = None
+
     def __init__(self):
+        if SymbolTable.instance:
+            raise Exception("cannot instantiate symbol table again")
+        
         self.table = []
+        self.full_table = []
         self.keywords = ["break", "continue",
                          "def", "else", "if", "return", "while", "global"]
+        self.base_address = 100
+        SymbolTable.instance = self
 
     def add_symbol(self, lexeme):
         if lexeme not in self.table:
             self.table.append(lexeme)
+            last_address = self.full_table[len(self.full_table) - 1][1] if len(self.full_table) != 0 else self.base_address - 4
+            self.full_table.append((lexeme, last_address + 4))
+
+    def get_address(self, lexeme):
+        if lexeme in self.table:
+            index = self.table.index(lexeme)
+            return self.full_table[index][1]
 
     # for debuggin purposes only
     def print(self):

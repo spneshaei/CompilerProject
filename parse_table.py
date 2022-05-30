@@ -39,7 +39,7 @@ parse_table = {
         ';': ['@']
     },
     'Simple_stmt': {
-        'break': ['break'],
+        'break': ['break', '#jp_break'],
         'continue': ['continue'],
         'ID': ['Assignment_Call'],
         'return': ['Return_stmt'],
@@ -53,12 +53,12 @@ parse_table = {
         ';': ['@']
     },
     'Assignment_Call': {
-        'ID': ['ID', 'B'],
+        'ID': ['#push_id', 'ID', 'B'],
         ';': ['@']
     },
     'B': {
-        '=': ['=', 'C'],
-        '[': ['[', 'Expression', ']', '=', 'C'],
+        '=': ['=', 'C', '#assign'],
+        '[': ['[', 'Expression', ']', '=', 'C', '#assign'],
         '(': ['(', 'Arguments', ')'],
         ';': ['@']
     },
@@ -73,7 +73,7 @@ parse_table = {
         ',': [',', 'Expression', 'List_Rest']
     },
     'Return_stmt': {
-        'return': ['return', 'Return_Value'],
+        'return': ['return', 'Return_Value', '#push_value'],
         ';': ['@']
     },
     'Return_Value': {
@@ -86,7 +86,7 @@ parse_table = {
         ';': ['@']
     },
     'Function_def': {
-        'def': ['def', 'ID', '(', 'Params', ')', ':', 'Statements'],
+        'def': ['def', '#push_id', 'ID', '(', 'Params', ')', ':', 'Statements'],
         ';': ['@']
     },
     'Params': {
@@ -98,26 +98,26 @@ parse_table = {
         ',': [',', 'ID', 'Params_Prime']
     },
     'If_stmt': {
-        'if': ['if', 'Relational_Expression', ':', 'Statements', 'Else_block'],
+        'if': ['if', 'Relational_Expression', '#save', ':', 'Statements', 'Else_block'],
         ';': ['@']
     },
     'Else_block': {
-        ';': [''],
-        'else': ['else', ':', 'Statements']
+        ';': ['#jpf'],
+        'else': ['else', '#jpf_save', ':', 'Statements', '#jp']
     },
     'Iteration_stmt': {
-        'while': ['while', '(', 'Relational_Expression', ')', 'Statements'],
+        'while': ['while', '#label', '(', 'Relational_Expression', ')', '#save', 'Statements', '#while'],
         ';': ['@']
     },
     'Relational_Expression': {
-        'ID': ['Expression', 'Relop', 'Expression'],
-        'NUM': ['Expression', 'Relop', 'Expression'],
+        'ID': ['Expression', 'Relop', 'Expression', '#end_op'],
+        'NUM': ['Expression', 'Relop', 'Expression', '#end_op'],
         ':': ['@'],
         ')': ['@']
     },
     'Relop': {
-        '==': ['=='],
-        '<': ['<'],
+        '==': ['#push_op', '=='],
+        '<': ['#push_op', '<'],
         'ID': ['@'],
         'NUM': ['@']
     },
@@ -139,9 +139,9 @@ parse_table = {
         ',': [''],
         '==': [''],
         '<': [''],
-        '+': ['+', 'Term', 'Expression_Prime'],
-        '-': ['-', 'Term', 'Expression_Prime'],
-        ':': [''] # Revision: Synch?!
+        '+': ['#push_op', '+', 'Term', 'Expression_Prime', '#end_op'],
+        '-': ['#push_op', '-', 'Term', 'Expression_Prime', '#end_op'],
+        ':': ['']
     },
     'Term': {
         'ID': ['Factor', 'Term_Prime'],
@@ -166,7 +166,7 @@ parse_table = {
         '<': [''],
         '+': [''],
         '-': [''],
-        '*': ['*', 'Factor', 'Term_Prime']
+        '*': ['#push_op', '*', 'Factor', 'Term_Prime']
     },
     'Factor': {
         'ID': ['Atom', 'Power'],
@@ -195,7 +195,7 @@ parse_table = {
         '+': ['Primary'],
         '-': ['Primary'],
         '*': ['Primary'],
-        '**': ['**', 'Factor']
+        '**': ['#push_op', '**', 'Factor']
     },
     'Primary': {
         ';': [''],
@@ -221,8 +221,8 @@ parse_table = {
         ',': [',', 'Expression', 'Arguments_Prime']
     },
     'Atom': {
-        'ID': ['ID'],
-        'NUM': ['NUM'],
+        'ID': ['#push_id', 'ID'],
+        'NUM': ['#push_num', 'NUM'],
         '**': ['@'],
         '[': ['@'],
         '(': ['@'],

@@ -5,7 +5,13 @@ from tokens import Tokens
 
 
 class Scanner:
+
+    instance = None
+
     def __init__(self, code_file):
+        if Scanner.instance:
+            raise Exception("cannot instantiate scanner again")
+        
         self.file = open(code_file)
         self.end_of_file = False
         self.symbol_table = SymbolTable()
@@ -16,6 +22,7 @@ class Scanner:
         self.line_no = 1
         self.is_rewinded = False
         self.lookahead_char = None
+        Scanner.instance = self
 
     def get_char(self):
         if self.is_rewinded:

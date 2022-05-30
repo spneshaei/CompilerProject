@@ -1,18 +1,25 @@
-import json
+from CodeGenerator import *
 from parse_table import *
 from Node import Node
 from scanner import Scanner
 
 
 class Parser:
+
+    instance = None
     parse_tree = Node(start_symbol, None)
     current_node = parse_tree
     next_token = ''
     stack = [parse_tree]
     errors = []
+    code_generator = None
 
     def __init__(self, scanner: Scanner):
+        if Parser.instance:
+            raise Exception('cannot instantiate parser again')
+        Parser.instance = self
         self.scanner = scanner
+        self.code_generator = CodeGenerator()
 
     def add_error(self, type):
         lineno = self.scanner.get_line_no()
@@ -43,7 +50,8 @@ class Parser:
 
     def push_to_stack(self, item: Node):
         self.stack.append(item)
-        self.current_node.add_child(item)
+        if not item.is_action_symbol:
+            self.current_node.add_child(item)
     
     def push_multiple_to_stack(self, items):
         for item in reversed(items):
@@ -73,7 +81,9 @@ class Parser:
             if (len(self.stack) == 0):
                 break
             self.pop_from_stack()
-            if (self.current_node.is_terminal):
+            if self.current_node.is_action_symbol:
+                self.code_generator.code_gen(self.current_node.name)
+            elif (self.current_node.is_terminal):
                 if (self.current_node.name != 'epsilon'):
                     if (not self.current_node.terminal_equals(self.next_token)):
                         self.add_error(type=3)

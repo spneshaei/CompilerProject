@@ -6,6 +6,7 @@ class Node:
     name = ''
     data = ''
     is_terminal = False
+    is_action_symbol = False
 
     def __init__(self, name, parent):
         self.parent = parent
@@ -13,6 +14,8 @@ class Node:
         self.is_terminal = not ParseTable.is_non_terminal(name)
         if (self.name == ''):
             self.name = 'epsilon'
+        if self.name[0] == '#':
+            self.is_action_symbol = True
         if (not self.is_terminal):
             self.children = []
 
