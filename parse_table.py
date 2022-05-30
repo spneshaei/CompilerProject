@@ -110,8 +110,8 @@ parse_table = {
         ';': ['@']
     },
     'Relational_Expression': {
-        'ID': ['Expression', 'Relop', 'Expression', '#end_op'],
-        'NUM': ['Expression', 'Relop', 'Expression', '#end_op'],
+        'ID': ['Expression', 'Relop', 'Expression', "#end_op"],
+        'NUM': ['Expression', 'Relop', 'Expression', "#end_op"],
         ':': ['@'],
         ')': ['@']
     },
@@ -166,7 +166,7 @@ parse_table = {
         '<': [''],
         '+': [''],
         '-': [''],
-        '*': ['#push_op', '*', 'Factor', 'Term_Prime']
+        '*': ['#push_op', '*', 'Factor', 'Term_Prime', '#end_op']
     },
     'Factor': {
         'ID': ['Atom', 'Power'],
@@ -195,7 +195,7 @@ parse_table = {
         '+': ['Primary'],
         '-': ['Primary'],
         '*': ['Primary'],
-        '**': ['#push_op', '**', 'Factor']
+        '**': ['#push_op', '**', 'Factor', '#end_op']
     },
     'Primary': {
         ';': [''],

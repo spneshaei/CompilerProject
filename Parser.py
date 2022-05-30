@@ -110,6 +110,7 @@ class Parser:
                         continue
                     else:
                         self.push_multiple_to_stack(children)
+        self.code_generator.print_program_block()
     
     def print_parse_tree(self):
         with open("parse_tree.txt", "w") as output:

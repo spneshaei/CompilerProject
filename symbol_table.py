@@ -1,3 +1,7 @@
+import random
+import string
+
+
 class SymbolTable:
 
     instance = None
@@ -23,6 +27,13 @@ class SymbolTable:
         if lexeme in self.table:
             index = self.table.index(lexeme)
             return self.full_table[index][1]
+    
+    def add_temp_symbol(self):
+        temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
+        while temp_name in self.table:
+            temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
+        self.add_symbol(temp_name)
+        return temp_name
 
     # for debuggin purposes only
     def print(self):
