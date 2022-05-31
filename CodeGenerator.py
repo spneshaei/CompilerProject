@@ -19,6 +19,10 @@ class CodeGenerator:
             self.end_op()
         elif action_symbol == "#save":
             self.save()
+        elif action_symbol == "#label":
+            self.label()
+        elif action_symbol == "#while":
+            self.while_()
         elif action_symbol == "#jpf_save":
             self.jpf_save()
         elif action_symbol == "#jp":
@@ -52,6 +56,18 @@ class CodeGenerator:
         temp_address = SymbolTable.instance.get_address(temp_id)
         self.push_to_program_block((operator, value1, value2, temp_address))
         self.push_to_stack((temp_id, "ID"))
+
+    def label(self):
+        i = len(self.program_block)
+        self.push_to_stack((i, "LINE_NO"))
+    
+    def while_(self):
+        saved_i = self.pop()[0]
+        labeled_i = self.pop()[0]
+        to_back_patch = list(self.program_block[saved_i])
+        to_back_patch[2] = len(self.program_block)
+        self.program_block[saved_i] = tuple(to_back_patch)
+        self.push_to_program_block(("JP", labeled_i))
 
     def save(self):
         i = len(self.program_block)
@@ -109,6 +125,10 @@ class CodeGenerator:
             return "SUB"
         elif operator == "*":
             return "MULT"
+        elif operator == "==":
+            return "EQ"
+        elif operator == "<":
+            return "LT"
 
     #for debugging purposes only
     def print_program_block(self):

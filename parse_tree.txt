@@ -2,8 +2,8 @@ Program
 ├── Statements
 │   ├── Statement
 │   │   └── Compound_stmt
-│   │       └── If_stmt
-│   │           ├── (KEYWORD, if)
+│   │       └── Iteration_stmt
+│   │           ├── (KEYWORD, while)
 │   │           ├── Relational_Expression
 │   │           │   ├── Expression
 │   │           │   │   ├── Term
@@ -31,31 +31,29 @@ Program
 │   │           │       │       └── epsilon
 │   │           │       └── Expression_Prime
 │   │           │           └── epsilon
-│   │           ├── (SYMBOL, :)
-│   │           ├── Statements
-│   │           │   ├── Statement
-│   │           │   │   └── Simple_stmt
-│   │           │   │       └── Assignment_Call
-│   │           │   │           ├── (ID, a)
-│   │           │   │           └── B
-│   │           │   │               ├── (SYMBOL, =)
-│   │           │   │               └── C
-│   │           │   │                   └── Expression
-│   │           │   │                       ├── Term
-│   │           │   │                       │   ├── Factor
-│   │           │   │                       │   │   ├── Atom
-│   │           │   │                       │   │   │   └── (NUM, 3)
-│   │           │   │                       │   │   └── Power
-│   │           │   │                       │   │       └── Primary
-│   │           │   │                       │   │           └── epsilon
-│   │           │   │                       │   └── Term_Prime
-│   │           │   │                       │       └── epsilon
-│   │           │   │                       └── Expression_Prime
-│   │           │   │                           └── epsilon
-│   │           │   ├── (SYMBOL, ;)
-│   │           │   └── Statements
-│   │           │       └── epsilon
-│   │           └── Else_block
+│   │           └── Statements
+│   │               ├── Statement
+│   │               │   └── Simple_stmt
+│   │               │       └── Assignment_Call
+│   │               │           ├── (ID, a)
+│   │               │           └── B
+│   │               │               ├── (SYMBOL, =)
+│   │               │               └── C
+│   │               │                   └── Expression
+│   │               │                       ├── Term
+│   │               │                       │   ├── Factor
+│   │               │                       │   │   ├── Atom
+│   │               │                       │   │   │   └── (NUM, 2)
+│   │               │                       │   │   └── Power
+│   │               │                       │   │       └── Primary
+│   │               │                       │   │           └── epsilon
+│   │               │                       │   └── Term_Prime
+│   │               │                       │       └── epsilon
+│   │               │                       └── Expression_Prime
+│   │               │                           └── epsilon
+│   │               ├── (SYMBOL, ;)
+│   │               └── Statements
+│   │                   └── epsilon
 │   ├── (SYMBOL, ;)
 │   └── Statements
 │       └── epsilon
