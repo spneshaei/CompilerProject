@@ -9,6 +9,8 @@ class CodeGenerator:
     def code_gen(self, action_symbol):
         if action_symbol == '#assign':
             self.assign()
+        elif action_symbol == '#assign_array':
+            self.assign_array()
         elif action_symbol == '#push_id':
             self.push_id()
         elif action_symbol == '#push_num':
@@ -31,6 +33,8 @@ class CodeGenerator:
             self.jpf()
         elif action_symbol == "#indirect_addr":
             self.indirect_addr()
+        elif action_symbol == "#init_array":
+            self.init_array()
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
@@ -41,6 +45,21 @@ class CodeGenerator:
         elif identifier[2] == "indirect":
             address = SymbolTable.instance.get_address(identifier[0])
             self.push_to_program_block(("ASSIGN", value, f"@{address}"))
+
+    def assign_array(self):
+        values = []
+        while self.semantic_stack(self.head())[0] != "start_array":
+            value = self.generate_address_mode(self.pop())
+            values.append(value)
+        values = values[::-1]
+        self.pop()
+        identifier = self.generate_address_mode(self.pop())
+        for i in range(len(values)):
+            self.push_to_program_block(("ASSIGN", identifier + 4 * i, values[i]))
+        # TODO: save address in symbol table so we don't assign to it again
+
+    def init_array(self):
+        self.push_to_stack(("start_array"))
 
     def push_id(self):
         identifier = Parser.Parser.instance.next_token[1]

@@ -57,15 +57,15 @@ parse_table = {
         ';': ['@']
     },
     'B': {
-        '=': ['=', 'C', '#assign'],
-        '[': ['[', 'Expression', ']', '#indirect_addr', '=', 'C', '#assign'],
+        '=': ['=', 'C'],
+        '[': ['[', 'Expression', ']', '#indirect_addr', '=', 'C'],
         '(': ['(', 'Arguments', ')'],
         ';': ['@']
     },
     'C': {
-        'ID': ['Expression'],
-        '[': ['[', 'Expression', 'List_Rest', ']'],
-        'NUM': ['Expression'],
+        'ID': ['Expression', '#assign'],
+        '[': ['#init_array', '[', 'Expression', '','List_Rest', ']', '#assign_array'],
+        'NUM': ['Expression', '#assign'],
         ';': ['@']
     },
     'List_Rest': {
