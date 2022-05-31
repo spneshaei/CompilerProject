@@ -65,12 +65,12 @@ class CodeGenerator:
         saved_i = self.pop()[0]
         labeled_i = self.pop()[0]
         to_back_patch = list(self.program_block[saved_i])
-        to_back_patch[2] = len(self.program_block)
+        to_back_patch[2] = len(self.program_block) + 1
         self.program_block[saved_i] = tuple(to_back_patch)
         self.push_to_program_block(("JP", labeled_i))
 
     def save(self):
-        i = len(self.program_block)
+        i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
         self.push_to_program_block(("JPF", value, "?"))
         self.push_to_stack((i, "LINE_NO"))
