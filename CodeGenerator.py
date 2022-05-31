@@ -39,6 +39,19 @@ class CodeGenerator:
             self.jp_break()
         elif action_symbol == "#jp_continue":
             self.jp_continue()
+        elif action_symbol == "#call_main":
+            self.call_main()
+        elif action_symbol == "#jp_main":
+            self.jp_main()
+
+    def call_main(self):
+        self.push_to_program_block(("JP", "?"))
+
+    def jp_main(self):
+        address = SymbolTable.instance.get_program_address("main")
+        to_back_patch = list(self.program_block[0])
+        to_back_patch[1] = address
+        self.program_block = tuple(to_back_patch)
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
@@ -105,12 +118,12 @@ class CodeGenerator:
         i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
         self.push_to_program_block(("JPF", value, "?"))
-        self.push_to_stack((i, "LINE_NO", "SAVE"))
+        self.push_to_stack((i, "LINE_NO"))
     
     def jpf_save(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = len(self.program_block)
+        to_back_patch[2] = len(self.program_block) - 1
         self.program_block[i] = tuple(to_back_patch)
         i = len(self.program_block)
         self.push_to_program_block(("JP", "?"))
@@ -119,19 +132,21 @@ class CodeGenerator:
     def jp(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[1] = len(self.program_block)
+        to_back_patch[1] = len(self.program_block) - 1
         self.program_block[i] = tuple(to_back_patch)
 
     def jpf(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = len(self.program_block)
+        to_back_patch[2] = len(self.program_block) - 1
         self.program_block[i] = tuple(to_back_patch)
 
     def jp_break(self):
+        # TODO
         pass
 
     def jp_continue(self):
+        # TODO
         pass
 
     def indirect_addr(self):

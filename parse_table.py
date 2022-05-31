@@ -4,15 +4,15 @@
 
 parse_table = {
     'Program': {
-        'break': ['Statements'],
-        'continue': ['Statements'],
-        'ID': ['Statements'],
-        'return': ['Statements'],
-        'global': ['Statements'],
-        'def': ['Statements'],
-        'if': ['Statements'],
-        'while': ['Statements'],
-        '$': ['Statements']
+        'break': ['#call_main', 'Statements', '#jp_main'],
+        'continue': ['#call_main', 'Statements', '#jp_main'],
+        'ID': ['#call_main', 'Statements', '#jp_main'],
+        'return': ['#call_main', 'Statements', '#jp_main'],
+        'global': ['#call_main', 'Statements', '#jp_main'],
+        'def': ['#call_main', 'Statements', '#jp_main'],
+        'if': ['#call_main', 'Statements', '#jp_main'],
+        'while': ['#call_main', 'Statements', '#jp_main'],
+        '$': ['#call_main', 'Statements', '#jp_main']
     },
     'Statements': {
         ';': [''],

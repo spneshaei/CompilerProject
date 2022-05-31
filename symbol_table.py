@@ -17,16 +17,24 @@ class SymbolTable:
         self.address = 96
         SymbolTable.instance = self
 
-    def add_symbol(self, lexeme):
+    def add_symbol(self, lexeme, program_address=None):
         if lexeme not in self.table:
             self.table.append(lexeme)
             self.address += 4
-            self.full_table.append((lexeme, self.address))
+            if program_address:
+                self.full_table.append((lexeme, self.address, program_address))
+            else:
+                self.full_table.append((lexeme, self.address))
 
     def get_address(self, lexeme):
         if lexeme in self.table:
             index = self.table.index(lexeme)
             return self.full_table[index][1]
+    
+    def get_program_address(self, lexeme):
+        if lexeme in self.table:
+            index = self.table.index(lexeme)
+            return self.full_table[index][2]
     
     def add_temp_symbol(self):
         temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
