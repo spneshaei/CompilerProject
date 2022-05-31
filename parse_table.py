@@ -40,7 +40,7 @@ parse_table = {
     },
     'Simple_stmt': {
         'break': ['break', '#jp_break'],
-        'continue': ['continue'],
+        'continue': ['continue', '#jp_continue'],
         'ID': ['Assignment_Call'],
         'return': ['Return_stmt'],
         'global': ['Global_stmt'],

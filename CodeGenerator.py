@@ -35,11 +35,16 @@ class CodeGenerator:
             self.indirect_addr()
         elif action_symbol == "#init_array":
             self.init_array()
+        elif action_symbol == "#jp_break":
+            self.jp_break()
+        elif action_symbol == "#jp_continue":
+            self.jp_continue()
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
         identifier = self.pop()
         if (identifier[2] == "direct"):
+            SymbolTable.instance.add_symbol(identifier[0])
             address = SymbolTable.instance.get_address(identifier[0])
             self.push_to_program_block(("ASSIGN", value, address))
         elif identifier[2] == "indirect":
@@ -48,18 +53,20 @@ class CodeGenerator:
 
     def assign_array(self):
         values = []
-        while self.semantic_stack(self.head())[0] != "start_array":
+        while self.semantic_stack[self.head()][0] != "start_array":
             value = self.generate_address_mode(self.pop())
             values.append(value)
         values = values[::-1]
         self.pop()
-        identifier = self.generate_address_mode(self.pop())
+        identifier = self.pop()[0]
+        SymbolTable.instance.add_symbol(identifier)
+        SymbolTable.instance.allocate((len(values) - 1) * 4)
+        identifier = SymbolTable.instance.get_address(identifier)
         for i in range(len(values)):
-            self.push_to_program_block(("ASSIGN", identifier + 4 * i, values[i]))
-        # TODO: save address in symbol table so we don't assign to it again
+            self.push_to_program_block(("ASSIGN", values[i], identifier + 4 * i))
 
     def init_array(self):
-        self.push_to_stack(("start_array"))
+        self.push_to_stack(("start_array", ""))
 
     def push_id(self):
         identifier = Parser.Parser.instance.next_token[1]
@@ -98,7 +105,7 @@ class CodeGenerator:
         i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
         self.push_to_program_block(("JPF", value, "?"))
-        self.push_to_stack((i, "LINE_NO"))
+        self.push_to_stack((i, "LINE_NO", "SAVE"))
     
     def jpf_save(self):
         i = self.pop()[0]
@@ -120,6 +127,12 @@ class CodeGenerator:
         to_back_patch = list(self.program_block[i])
         to_back_patch[2] = len(self.program_block)
         self.program_block[i] = tuple(to_back_patch)
+
+    def jp_break(self):
+        pass
+
+    def jp_continue(self):
+        pass
 
     def indirect_addr(self):
         value = self.generate_address_mode(self.pop())

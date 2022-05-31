@@ -14,14 +14,14 @@ class SymbolTable:
         self.full_table = []
         self.keywords = ["break", "continue",
                          "def", "else", "if", "return", "while", "global"]
-        self.base_address = 100
+        self.address = 96
         SymbolTable.instance = self
 
     def add_symbol(self, lexeme):
         if lexeme not in self.table:
             self.table.append(lexeme)
-            last_address = self.full_table[len(self.full_table) - 1][1] if len(self.full_table) != 0 else self.base_address - 4
-            self.full_table.append((lexeme, last_address + 4))
+            self.address += 4
+            self.full_table.append((lexeme, self.address))
 
     def get_address(self, lexeme):
         if lexeme in self.table:
@@ -34,6 +34,10 @@ class SymbolTable:
             temp_name = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
         self.add_symbol(temp_name)
         return temp_name
+    
+    def allocate(self, value):
+        assert value % 4 == 0
+        self.address += value
 
     # for debuggin purposes only
     def print(self):
@@ -43,6 +47,13 @@ class SymbolTable:
             index += 1
         for lexeme in self.table:
             print(index, ". ", lexeme)
+            index += 1
+    
+    # for debuggin purposes only
+    def print_full(self):
+        index = 1
+        for item in self.full_table:
+            print(index, ". ", item[0], "\t", item[1])
             index += 1
     
     def write_to_file(self):

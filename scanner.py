@@ -87,6 +87,6 @@ class Scanner:
             token_type = self.dfa.get_type()
         if (token_type != 'WHITESPACE' and token_type != 'COMMENT'):
             self.tokens.add_token(token_type, buffer, self.line_no)
-        if (token_type == 'ID'):
-            self.symbol_table.add_symbol(buffer)
+        # if (token_type == 'ID'):
+        #     self.symbol_table.add_symbol(buffer)
         return (token_type, buffer)
