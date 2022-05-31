@@ -29,16 +29,22 @@ class CodeGenerator:
             self.jp()
         elif action_symbol == "#jpf":
             self.jpf()
+        elif action_symbol == "#indirect_addr":
+            self.indirect_addr()
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
-        identifier = self.pop()[0]
-        address = SymbolTable.instance.get_address(identifier)
-        self.push_to_program_block(("ASSIGN", value, address))
+        identifier = self.pop()
+        if (identifier[2] == "direct"):
+            address = SymbolTable.instance.get_address(identifier[0])
+            self.push_to_program_block(("ASSIGN", value, address))
+        elif identifier[2] == "indirect":
+            address = SymbolTable.instance.get_address(identifier[0])
+            self.push_to_program_block(("ASSIGN", value, f"@{address}"))
 
     def push_id(self):
         identifier = Parser.Parser.instance.next_token[1]
-        self.push_to_stack((identifier, "ID"))
+        self.push_to_stack((identifier, "ID", "direct"))
 
     def push_num(self):
         number = Parser.Parser.instance.next_token[1]
@@ -96,6 +102,18 @@ class CodeGenerator:
         to_back_patch[2] = len(self.program_block)
         self.program_block[i] = tuple(to_back_patch)
 
+    def indirect_addr(self):
+        value = self.generate_address_mode(self.pop())
+        id = self.generate_address_mode(self.pop())
+        temp_id1 = SymbolTable.instance.add_temp_symbol()
+        temp_address1 = SymbolTable.instance.get_address(temp_id1)
+        self.push_to_program_block(("MULT", value, "#4", temp_address1))
+        temp_id2 = SymbolTable.instance.add_symbol()
+        temp_address2 = SymbolTable.instance.get_address(temp_id2)
+        self.push_to_program_block(("ADD", f"#{id}", temp_address1, temp_address2))
+        self.push_to_stack((temp_id2, "ID", "indirect"))
+
+
 
         
 
@@ -106,6 +124,9 @@ class CodeGenerator:
 
     def pop(self):
         return self.semantic_stack.pop()
+
+    def head(self):
+        return len(self.semantic_stack) - 1
 
     def push_to_program_block(self, three_address_code):
         assert isinstance(three_address_code, tuple)

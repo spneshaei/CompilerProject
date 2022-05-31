@@ -58,7 +58,7 @@ parse_table = {
     },
     'B': {
         '=': ['=', 'C', '#assign'],
-        '[': ['[', 'Expression', ']', '=', 'C', '#assign'],
+        '[': ['[', 'Expression', ']', '#indirect_addr', '=', 'C', '#assign'],
         '(': ['(', 'Arguments', ')'],
         ';': ['@']
     },
@@ -73,7 +73,7 @@ parse_table = {
         ',': [',', 'Expression', 'List_Rest']
     },
     'Return_stmt': {
-        'return': ['return', 'Return_Value', '#push_value'],
+        'return': ['return', 'Return_Value', '#return_value'],
         ';': ['@']
     },
     'Return_Value': {
@@ -86,7 +86,7 @@ parse_table = {
         ';': ['@']
     },
     'Function_def': {
-        'def': ['def', '#push_id', 'ID', '(', 'Params', ')', ':', 'Statements'],
+        'def': ['def', '#func_def', 'ID', '(', 'Params', ')', ':', 'Statements'],
         ';': ['@']
     },
     'Params': {
