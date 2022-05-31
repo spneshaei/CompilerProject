@@ -108,7 +108,7 @@ class CodeGenerator:
         temp_id1 = SymbolTable.instance.add_temp_symbol()
         temp_address1 = SymbolTable.instance.get_address(temp_id1)
         self.push_to_program_block(("MULT", value, "#4", temp_address1))
-        temp_id2 = SymbolTable.instance.add_symbol()
+        temp_id2 = SymbolTable.instance.add_temp_symbol()
         temp_address2 = SymbolTable.instance.get_address(temp_id2)
         self.push_to_program_block(("ADD", f"#{id}", temp_address1, temp_address2))
         self.push_to_stack((temp_id2, "ID", "indirect"))
