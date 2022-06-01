@@ -71,8 +71,7 @@ class CodeGenerator:
     def func_def(self):
         identifier = Parser.Parser.instance.next_token[1]
         self.scope = identifier
-        SymbolTable.instance.add_symbol(identifier, self.program_line())
-        # self.push_to_stack((identifier, "ID", "direct")) TODO: needed?
+        SymbolTable.instance.add_symbol(identifier, self.program_line() + 1)
 
     def call_main(self):
         self.push_to_program_block(("JP", "?"))
