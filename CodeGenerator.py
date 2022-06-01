@@ -75,9 +75,12 @@ class CodeGenerator:
         self.pop()
         args = args[::-1]
         func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # TO remove scope
+        if func_name == "output": # TODO: check if one argument exists
+            self.push_to_program_block(("PRINT", args[0]))
+            return
         func_program_line = SymbolTable.instance.get_program_address(func_name)
         func_address = SymbolTable.instance.get_address(func_name)
-        for i in range(len(args)):
+        for i in range(len(args)): # TODO: check number of arguments
             arg_address = func_address + 4 * (i + 1)
             self.push_to_program_block(("ASSIGN", args[i], arg_address))
         self.push_to_program_block(("ASSIGN", self.return_address, self.program_line() + 3))
@@ -93,7 +96,7 @@ class CodeGenerator:
         self.pop()
         params = params[::-1]
         for i in range(len(params)):
-            SymbolTable.instance.add_symbol(params[i])
+            SymbolTable.instance.add_symbol(params[i], type="parameter")
     
     def init_param(self):
         self.push_to_stack(("start_param", ""))
@@ -101,7 +104,7 @@ class CodeGenerator:
     def func_def(self):
         identifier = Parser.Parser.instance.next_token[1]
         self.scope = identifier
-        SymbolTable.instance.add_symbol(identifier, self.program_line() + 1)
+        SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function")
 
     def call_main(self):
         self.push_to_program_block(("JP", "?"))
@@ -116,7 +119,7 @@ class CodeGenerator:
         value = self.generate_address_mode(self.pop())
         identifier = self.pop()
         if (identifier[2] == "direct"):
-            SymbolTable.instance.add_symbol(identifier[0])
+            SymbolTable.instance.add_symbol(identifier[0], type="integer")
             address = SymbolTable.instance.get_address(identifier[0])
             self.push_to_program_block(("ASSIGN", value, address))
         elif identifier[2] == "indirect":
@@ -131,7 +134,7 @@ class CodeGenerator:
         values = values[::-1]
         self.pop()
         identifier = self.pop()[0]
-        SymbolTable.instance.add_symbol(identifier)
+        SymbolTable.instance.add_symbol(identifier, type="array")
         SymbolTable.instance.allocate((len(values) - 1) * 4)
         identifier = SymbolTable.instance.get_address(identifier)
         for i in range(len(values)):
