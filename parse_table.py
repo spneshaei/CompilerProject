@@ -86,16 +86,16 @@ parse_table = {
         ';': ['@']
     },
     'Function_def': {
-        'def': ['def', '#func_def', 'ID', '(', 'Params', ')', ':', 'Statements'],
+        'def': ['def', '#func_def', 'ID', '#init_param','(', 'Params', ')', '#assign_param',':', 'Statements', '#end_func'],
         ';': ['@']
     },
     'Params': {
-        'ID': ['ID', 'Params_Prime'],
+        'ID': ['#push_id', 'ID', 'Params_Prime'],
         ')': ['']
     },
     'Params_Prime': {
         ')': [''],
-        ',': [',', 'ID', 'Params_Prime']
+        ',': [',', '#push_id', 'ID', 'Params_Prime']
     },
     'If_stmt': {
         'if': ['if', 'Relational_Expression', '#save', ':', 'Statements', 'Else_block'],

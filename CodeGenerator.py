@@ -5,6 +5,7 @@ import Parser
 class CodeGenerator:
     semantic_stack = []
     program_block = []
+    scope = None
 
     def code_gen(self, action_symbol):
         if action_symbol == '#assign':
@@ -43,6 +44,35 @@ class CodeGenerator:
             self.call_main()
         elif action_symbol == "#jp_main":
             self.jp_main()
+        elif action_symbol == '#func_def':
+            self.func_def()
+        elif action_symbol == "#init_param":
+            self.init_param()
+        elif action_symbol == '#assign_param':
+            self.assign_param()
+        elif action_symbol == "#end_func":
+            self.end_func()
+
+    def end_func(self):
+        self.scope = None
+
+    def assign_param(self):
+        params = []
+        while self.semantic_stack[self.head()][0] != "start_param":
+            params.append(self.pop()[0])
+        self.pop()
+        params = params[::-1]
+        for i in range(len(params)):
+            SymbolTable.instance.add_symbol(params[i])
+    
+    def init_param(self):
+        self.push_to_stack(("start_param", ""))
+
+    def func_def(self):
+        identifier = Parser.Parser.instance.next_token[1]
+        self.scope = identifier
+        SymbolTable.instance.add_symbol(identifier, self.program_line())
+        # self.push_to_stack((identifier, "ID", "direct")) TODO: needed?
 
     def call_main(self):
         self.push_to_program_block(("JP", "?"))
@@ -51,7 +81,7 @@ class CodeGenerator:
         address = SymbolTable.instance.get_program_address("main")
         to_back_patch = list(self.program_block[0])
         to_back_patch[1] = address
-        self.program_block = tuple(to_back_patch)
+        self.program_block[0] = tuple(to_back_patch)
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
@@ -83,6 +113,8 @@ class CodeGenerator:
 
     def push_id(self):
         identifier = Parser.Parser.instance.next_token[1]
+        if self.scope:
+            identifier = f"{self.scope} {identifier}"
         self.push_to_stack((identifier, "ID", "direct"))
 
     def push_num(self):
@@ -123,7 +155,7 @@ class CodeGenerator:
     def jpf_save(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = len(self.program_block) - 1
+        to_back_patch[2] = self.program_line()
         self.program_block[i] = tuple(to_back_patch)
         i = len(self.program_block)
         self.push_to_program_block(("JP", "?"))
@@ -132,13 +164,13 @@ class CodeGenerator:
     def jp(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[1] = len(self.program_block) - 1
+        to_back_patch[1] = self.program_line()
         self.program_block[i] = tuple(to_back_patch)
 
     def jpf(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = len(self.program_block) - 1
+        to_back_patch[2] = self.program_line()
         self.program_block[i] = tuple(to_back_patch)
 
     def jp_break(self):
@@ -174,6 +206,9 @@ class CodeGenerator:
 
     def head(self):
         return len(self.semantic_stack) - 1
+
+    def program_line(self):
+        return len(self.program_block) - 1
 
     def push_to_program_block(self, three_address_code):
         assert isinstance(three_address_code, tuple)
