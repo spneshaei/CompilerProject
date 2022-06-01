@@ -14,7 +14,7 @@ class SymbolTable:
         self.full_table = []
         self.keywords = ["break", "continue",
                          "def", "else", "if", "return", "while", "global"]
-        self.address = 96
+        self.address = 104
         SymbolTable.instance = self
 
     def add_symbol(self, lexeme, program_address=None):

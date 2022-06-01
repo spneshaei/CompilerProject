@@ -6,6 +6,8 @@ class CodeGenerator:
     semantic_stack = []
     program_block = []
     scope = None
+    return_address = 100
+    return_value_address = 104
 
     def code_gen(self, action_symbol):
         if action_symbol == '#assign':
@@ -52,6 +54,34 @@ class CodeGenerator:
             self.assign_param()
         elif action_symbol == "#end_func":
             self.end_func()
+        elif action_symbol == "#init_args":
+            self.init_args()
+        elif action_symbol == "#assign_args":
+            self.assign_args()
+        elif action_symbol == "#return_value":
+            self.return_value()
+
+    def return_value(self):
+        # TODO: assign to return_value_address
+        self.push_to_program_block(("JP", f"@{self.return_address}"))
+
+    def init_args(self):
+        self.push_to_stack(("start_args", ""))
+
+    def assign_args(self):
+        args = []
+        while self.semantic_stack[self.head()][0] != "start_args":
+            args.append(self.generate_address_mode(self.pop()))
+        self.pop()
+        args = args[::-1]
+        func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # TO remove scope
+        func_program_line = SymbolTable.instance.get_program_address(func_name)
+        func_address = SymbolTable.instance.get_address(func_name)
+        for i in range(len(args)):
+            arg_address = func_address + 4 * (i + 1)
+            self.push_to_program_block(("ASSIGN", args[i], arg_address))
+        self.push_to_program_block(("ASSIGN", self.return_address, self.program_line() + 3))
+        self.push_to_program_block(("JP", func_program_line))
 
     def end_func(self):
         self.scope = None
