@@ -83,11 +83,12 @@ class CodeGenerator:
         for i in range(len(args)): # TODO: check number of arguments
             arg_address = func_address + 4 * (i + 1)
             self.push_to_program_block(("ASSIGN", args[i], arg_address))
-        self.push_to_program_block(("ASSIGN", self.return_address, self.program_line() + 3))
+        self.push_to_program_block(("ASSIGN", self.program_line() + 3, self.return_address))
         self.push_to_program_block(("JP", func_program_line))
 
     def end_func(self):
         self.scope = None
+        self.push_to_program_block(("JP", f"@{self.return_address}"))
 
     def assign_param(self):
         params = []
@@ -120,11 +121,13 @@ class CodeGenerator:
         identifier = self.pop()
         if (identifier[2] == "direct"):
             SymbolTable.instance.add_symbol(identifier[0], type="integer")
-            address = SymbolTable.instance.get_address(identifier[0])
-            self.push_to_program_block(("ASSIGN", value, address))
-        elif identifier[2] == "indirect":
-            address = SymbolTable.instance.get_address(identifier[0])
-            self.push_to_program_block(("ASSIGN", value, f"@{address}"))
+        address = self.generate_address_mode(identifier)
+        self.push_to_program_block(("ASSIGN", value, address))
+        #     address = SymbolTable.instance.get_address(identifier[0])
+        #     self.push_to_program_block(("ASSIGN", value, address))
+        # elif identifier[2] == "indirect":
+        #     address = SymbolTable.instance.get_address(identifier[0])
+        #     self.push_to_program_block(("ASSIGN", value, f"@{address}"))
 
     def assign_array(self):
         values = []
@@ -168,7 +171,7 @@ class CodeGenerator:
 
     def label(self):
         i = len(self.program_block)
-        self.push_to_stack((i, "LINE_NO"))
+        self.push_to_stack((i, "LINE_NO", "while"))
     
     def while_(self):
         saved_i = self.pop()[0]
@@ -210,8 +213,11 @@ class CodeGenerator:
         pass
 
     def jp_continue(self):
-        # TODO
-        pass
+        head = self.head()
+        while len(self.semantic_stack[head]) != 3 or self.semantic_stack[head][2] != "while":
+            head -= 1
+        i = self.semantic_stack[head][0]
+        self.push_to_program_block(("JP", i))
 
     def indirect_addr(self):
         value = self.generate_address_mode(self.pop())
@@ -249,6 +255,8 @@ class CodeGenerator:
     def generate_address_mode(self, value):
         if value[1] == "ID":
             address = SymbolTable.instance.get_address(value[0])
+            if len(value) == 3 and value[2] == "indirect":
+                return f"@{address}"
             return f"{address}"
         if value[1] == "NUM":
             return f"#{value[0]}"

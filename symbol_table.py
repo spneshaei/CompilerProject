@@ -72,7 +72,7 @@ class SymbolTable:
     def print_full(self):
         index = 1
         for item in self.full_table:
-            print(index, ". ", item[0], "\t", item[1])
+            print(index, ". ", item["lexeme"], "\t", item["address"], "\t", item["type"])
             index += 1
     
     def write_to_file(self):

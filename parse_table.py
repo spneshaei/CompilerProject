@@ -199,9 +199,9 @@ parse_table = {
     },
     'Primary': {
         ';': [''],
-        '[' : ['[', 'Expression', ']', 'Primary'],
+        '[' : ['[', 'Expression', ']', '#indirect_addr', 'Primary'],
         ']': [''],
-        '(' : ['(', 'Arguments', ')', 'Primary'],
+        '(' : ['#init_args', '(', 'Arguments', ')', '#assign_args', 'Primary'],
         ')': [''],
         ',': [''],
         ':': [''],
