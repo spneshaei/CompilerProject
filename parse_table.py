@@ -59,7 +59,7 @@ parse_table = {
     'B': {
         '=': ['=', 'C'],
         '[': ['[', 'Expression', ']', '#indirect_addr', '=', 'C'],
-        '(': ['#init_args', '(', 'Arguments', ')', '#assign_args'],
+        '(': ['#init_args', '(', 'Arguments', ')', '#assign_args', '#pop_func'],
         ';': ['@']
     },
     'C': {
@@ -73,13 +73,13 @@ parse_table = {
         ',': [',', 'Expression', 'List_Rest']
     },
     'Return_stmt': {
-        'return': ['return', 'Return_Value', '#return_value'],
+        'return': ['return', 'Return_Value', '#jp_return'],
         ';': ['@']
     },
     'Return_Value': {
         ';': [''],
-        'ID': ['Expression'],
-        'NUM': ['Expression'],
+        'ID': ['Expression', '#return_value'],
+        'NUM': ['Expression', '#return_value'],
     },
     'Global_stmt': {
         'global': ['global', 'ID'],

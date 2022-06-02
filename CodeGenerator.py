@@ -56,10 +56,23 @@ class CodeGenerator:
             self.assign_args()
         elif action_symbol == "#return_value":
             self.return_value()
+        elif action_symbol == "#jp_return":
+            self.jp_return()
+        elif action_symbol == "#pop_func":
+            self.pop_func()
+    
+    def pop_func(self):
+        self.pop()
 
     def return_value(self):
-        # TODO: assign to return_value_address
-        self.push_to_program_block(("JP", f"@{self.return_address}"))
+        value = self.generate_address_mode(self.pop())
+        self.push_to_program_block(("ASSIGN", value, self.return_value_address))
+
+    def jp_return(self):
+        if self.scope == "main":
+            return
+        return_memory = SymbolTable.instance.get_address(f"{self.scope} return")
+        self.push_to_program_block(("JP", f"@{return_memory}"))
 
     def init_args(self):
         self.push_to_stack(("start_args", ""))
@@ -73,25 +86,27 @@ class CodeGenerator:
         func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # TO remove scope
         if func_name == "output": # TODO: check if one argument exists
             self.push_to_program_block(("PRINT", args[0]))
-            self.pop()
             return
         func_program_line = SymbolTable.instance.get_program_address(func_name)
         func_address = SymbolTable.instance.get_address(func_name)
+        index = 1
         for i in range(len(args)): # TODO: check number of arguments
-            arg_address = func_address + 4 * (i + 1)
+            arg_address = func_address + 4 * index
             self.push_to_program_block(("ASSIGN", args[i], arg_address))
-        self.push_to_program_block(("ASSIGN", self.program_line() + 3, self.return_address))
+            index += 1
+        self.push_to_program_block(("ASSIGN", f"#{self.program_line() + 3}", func_address + 4 * index)) # return value for function
         self.push_to_program_block(("JP", func_program_line))
 
     def end_func(self):
+        self.jp_return()
         self.scope = None
-        self.push_to_program_block(("JP", f"@{self.return_address}"))
-        top_item = self.semantic_stack[self.head()]
-        if len(top_item) == 2 and top_item[1] == 'LINE_NO':
-            self.pop()
-            to_back_patch = list(self.program_block[top_item[0]])
-            to_back_patch[1] = self.program_line() + 1
-            self.program_block[top_item[0]] = tuple(to_back_patch)
+        if self.head() >= 0:
+            top_item = self.semantic_stack[self.head()]
+            if len(top_item) == 2 and top_item[1] == 'LINE_NO':
+                self.pop()
+                to_back_patch = list(self.program_block[top_item[0]])
+                to_back_patch[1] = self.program_line() + 1
+                self.program_block[top_item[0]] = tuple(to_back_patch)
 
     def assign_param(self):
         params = []
@@ -101,6 +116,7 @@ class CodeGenerator:
         params = params[::-1]
         for i in range(len(params)):
             SymbolTable.instance.add_symbol(params[i], type="parameter")
+        SymbolTable.instance.add_symbol(f"{self.scope} return", type="return")
     
     def init_param(self):
         self.push_to_stack(("start_param", ""))
@@ -114,12 +130,16 @@ class CodeGenerator:
         SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function")
 
     def assign(self):
-        value = self.generate_address_mode(self.pop())
+        value = self.pop()
         identifier = self.pop()
         if (identifier[2] == "direct"):
             SymbolTable.instance.add_symbol(identifier[0], type="integer")
         address = self.generate_address_mode(identifier)
-        self.push_to_program_block(("ASSIGN", value, address))
+        if SymbolTable.instance.get_type(value[0].split()[-1]) == "function":
+            self.push_to_program_block(("ASSIGN", self.return_value_address, address))
+        else:
+            value = self.generate_address_mode(value)
+            self.push_to_program_block(("ASSIGN", value, address))
         #     address = SymbolTable.instance.get_address(identifier[0])
         #     self.push_to_program_block(("ASSIGN", value, address))
         # elif identifier[2] == "indirect":
@@ -163,7 +183,7 @@ class CodeGenerator:
         value2 = self.generate_address_mode(self.pop())
         temp_id = SymbolTable.instance.add_temp_symbol()
         temp_address = SymbolTable.instance.get_address(temp_id)
-        self.push_to_program_block((operator, value1, value2, temp_address))
+        self.push_to_program_block((operator, value2, value1, temp_address))
         self.push_to_stack((temp_id, "ID"))
 
     def label(self):
@@ -187,7 +207,7 @@ class CodeGenerator:
     def jpf_save(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = self.program_line()
+        to_back_patch[2] = self.program_line() + 2
         self.program_block[i] = tuple(to_back_patch)
         i = len(self.program_block)
         self.push_to_program_block(("JP", "?"))
@@ -196,13 +216,13 @@ class CodeGenerator:
     def jp(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[1] = self.program_line()
+        to_back_patch[1] = self.program_line() + 1
         self.program_block[i] = tuple(to_back_patch)
 
     def jpf(self):
         i = self.pop()[0]
         to_back_patch = list(self.program_block[i])
-        to_back_patch[2] = self.program_line()
+        to_back_patch[2] = self.program_line() + 1
         self.program_block[i] = tuple(to_back_patch)
 
     def jp_break(self):
@@ -280,5 +300,10 @@ class CodeGenerator:
     def print_program_block(self):
         i = 0
         for item in self.program_block:
-            print(f"{i}\t{item}")
+            if len(item) == 4:
+                print(f"{i}\t({item[0]}, {item[1]}, {item[2]}, {item[3]})")
+            elif len(item) == 3:
+                print(f"{i}\t({item[0]}, {item[1]}, {item[2]},)")
+            else:
+                print(f"{i}\t({item[0]}, {item[1]}, ,)")
             i += 1
