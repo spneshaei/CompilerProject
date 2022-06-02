@@ -77,6 +77,7 @@ class CodeGenerator:
         func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # TO remove scope
         if func_name == "output": # TODO: check if one argument exists
             self.push_to_program_block(("PRINT", args[0]))
+            self.pop()
             return
         func_program_line = SymbolTable.instance.get_program_address(func_name)
         func_address = SymbolTable.instance.get_address(func_name)
@@ -89,6 +90,12 @@ class CodeGenerator:
     def end_func(self):
         self.scope = None
         self.push_to_program_block(("JP", f"@{self.return_address}"))
+        top_item = self.semantic_stack[self.head()]
+        if len(top_item) == 2 and top_item[1] == 'LINE_NO':
+            self.pop()
+            to_back_patch = list(self.program_block[top_item[0]])
+            to_back_patch[1] = self.program_line() + 1
+            self.program_block[top_item[0]] = tuple(to_back_patch)
 
     def assign_param(self):
         params = []
@@ -104,17 +111,22 @@ class CodeGenerator:
 
     def func_def(self):
         identifier = Parser.Parser.instance.next_token[1]
+        if identifier != "main":
+            self.push_to_program_block(("JP", "?"))
+            self.push_to_stack((self.program_line(), "LINE_NO"))
         self.scope = identifier
         SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function")
 
     def call_main(self):
-        self.push_to_program_block(("JP", "?"))
+        # self.push_to_program_block(("JP", "?"))
+        pass
 
     def jp_main(self):
-        address = SymbolTable.instance.get_program_address("main")
-        to_back_patch = list(self.program_block[0])
-        to_back_patch[1] = address
-        self.program_block[0] = tuple(to_back_patch)
+        pass
+        # address = SymbolTable.instance.get_program_address("main")
+        # to_back_patch = list(self.program_block[0])
+        # to_back_patch[1] = address
+        # self.program_block[0] = tuple(to_back_patch)
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
@@ -209,8 +221,14 @@ class CodeGenerator:
         self.program_block[i] = tuple(to_back_patch)
 
     def jp_break(self):
-        # TODO
         pass
+        # i = len(self.program_block)
+        # self.push_to_program_block(("JP", "?"))
+        # self.push_to_stack((i, "LINE_NO", "break"))
+        # index = self.head()
+        # while len(self.semantic_stack[index]) != 3 or self.semantic_stack[index][2] != "while":
+        #     index -= 1
+        # self.semantic_stack.insert(index+1 ,(i, "LINE_NO", "break"))
 
     def jp_continue(self):
         head = self.head()
