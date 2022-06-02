@@ -42,10 +42,6 @@ class CodeGenerator:
             self.jp_break()
         elif action_symbol == "#jp_continue":
             self.jp_continue()
-        elif action_symbol == "#call_main":
-            self.call_main()
-        elif action_symbol == "#jp_main":
-            self.jp_main()
         elif action_symbol == '#func_def':
             self.func_def()
         elif action_symbol == "#init_param":
@@ -116,17 +112,6 @@ class CodeGenerator:
             self.push_to_stack((self.program_line(), "LINE_NO"))
         self.scope = identifier
         SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function")
-
-    def call_main(self):
-        # self.push_to_program_block(("JP", "?"))
-        pass
-
-    def jp_main(self):
-        pass
-        # address = SymbolTable.instance.get_program_address("main")
-        # to_back_patch = list(self.program_block[0])
-        # to_back_patch[1] = address
-        # self.program_block[0] = tuple(to_back_patch)
 
     def assign(self):
         value = self.generate_address_mode(self.pop())
