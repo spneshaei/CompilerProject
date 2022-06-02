@@ -36,6 +36,7 @@ class SymbolTable:
         if lexeme in self.table:
             index = self.table.index(lexeme)
             return self.full_table[index]['address']
+        return None
     
     def get_program_address(self, lexeme):
         if lexeme in self.table:

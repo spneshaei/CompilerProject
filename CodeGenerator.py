@@ -22,8 +22,10 @@ class CodeGenerator:
             self.push_op()
         elif action_symbol == "#end_op":
             self.end_op()
-        elif action_symbol == "#save":
-            self.save()
+        elif action_symbol == "#save_if":
+            self.save_if()
+        elif action_symbol == "#save_while":
+            self.save_while()
         elif action_symbol == "#label":
             self.label()
         elif action_symbol == "#while":
@@ -60,6 +62,15 @@ class CodeGenerator:
             self.jp_return()
         elif action_symbol == "#pop_func":
             self.pop_func()
+        elif action_symbol == "#push_return":
+            self.push_return()
+
+    def push_return(self):
+        self.pop()
+        tmp_id = SymbolTable.instance.add_temp_symbol()
+        tmp_address = SymbolTable.instance.get_address(tmp_id)
+        self.push_to_program_block(("ASSIGN", self.return_value_address, tmp_address))
+        self.push_to_stack((tmp_id, "ID"))
     
     def pop_func(self):
         self.pop()
@@ -193,16 +204,23 @@ class CodeGenerator:
     def while_(self):
         saved_i = self.pop()[0]
         labeled_i = self.pop()[0]
-        to_back_patch = list(self.program_block[saved_i])
-        to_back_patch[2] = len(self.program_block) + 1
-        self.program_block[saved_i] = tuple(to_back_patch)
+        for i in saved_i:
+            to_back_patch = list(self.program_block[i])
+            to_back_patch[len(to_back_patch) - 1] = len(self.program_block) + 1
+            self.program_block[i] = tuple(to_back_patch)
         self.push_to_program_block(("JP", labeled_i))
 
-    def save(self):
+    def save_if(self):
         i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
         self.push_to_program_block(("JPF", value, "?"))
-        self.push_to_stack((i, "LINE_NO"))
+        self.push_to_stack((i, "LINE_NO", "jpf_save"))
+    
+    def save_while(self):
+        i = len(self.program_block) 
+        value = self.generate_address_mode(self.pop())
+        self.push_to_program_block(("JPF", value, "?"))
+        self.push_to_stack(([i], "LINE_NO", "jpf_while"))
     
     def jpf_save(self):
         i = self.pop()[0]
@@ -226,7 +244,14 @@ class CodeGenerator:
         self.program_block[i] = tuple(to_back_patch)
 
     def jp_break(self):
-        pass
+        index = self.head()
+        item = self.semantic_stack[index]
+        while index >= 0 and not (len(item) == 3 and item[2] == "jpf_while"):
+            index -= 1
+            item = self.semantic_stack[index]
+        self.push_to_program_block(("JP", "?"))
+        line_no = self.program_line()
+        item[0].append(line_no)
         # i = len(self.program_block)
         # self.push_to_program_block(("JP", "?"))
         # self.push_to_stack((i, "LINE_NO", "break"))
@@ -278,6 +303,10 @@ class CodeGenerator:
     def generate_address_mode(self, value):
         if value[1] == "ID":
             address = SymbolTable.instance.get_address(value[0])
+            if not address:
+                value = list(value)
+                value[0] = value[0].split(" ")[-1]
+                return self.generate_address_mode(tuple(value))
             if len(value) == 3 and value[2] == "indirect":
                 return f"@{address}"
             return f"{address}"
@@ -295,6 +324,19 @@ class CodeGenerator:
             return "EQ"
         elif operator == "<":
             return "LT"
+
+    def write_to_file(self):
+        file = open("output.txt", "w")
+        i = 0
+        for item in self.program_block:
+            if len(item) == 4:
+                file.write(f"{i}\t({item[0]}, {item[1]}, {item[2]}, {item[3]})\n")
+            elif len(item) == 3:
+                file.write(f"{i}\t({item[0]}, {item[1]}, {item[2]},)\n")
+            else:
+                file.write(f"{i}\t({item[0]}, {item[1]}, ,)\n")
+            i += 1    
+        file.close()
 
     #for debugging purposes only
     def print_program_block(self):

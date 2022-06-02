@@ -98,7 +98,7 @@ parse_table = {
         ',': [',', '#push_id', 'ID', 'Params_Prime']
     },
     'If_stmt': {
-        'if': ['if', 'Relational_Expression', '#save', ':', 'Statements', 'Else_block'],
+        'if': ['if', 'Relational_Expression', '#save_if', ':', 'Statements', 'Else_block'],
         ';': ['@']
     },
     'Else_block': {
@@ -106,7 +106,7 @@ parse_table = {
         'else': ['else', '#jpf_save', ':', 'Statements', '#jp']
     },
     'Iteration_stmt': {
-        'while': ['while', '#label', '(', 'Relational_Expression', ')', '#save', 'Statements', '#while'],
+        'while': ['while', '#label', '(', 'Relational_Expression', ')', '#save_while', 'Statements', '#while'],
         ';': ['@']
     },
     'Relational_Expression': {
@@ -201,7 +201,7 @@ parse_table = {
         ';': [''],
         '[' : ['[', 'Expression', ']', '#indirect_addr', 'Primary'],
         ']': [''],
-        '(' : ['#init_args', '(', 'Arguments', ')', '#assign_args', 'Primary'],
+        '(' : ['#init_args', '(', 'Arguments', ')', '#assign_args', '#push_return','Primary'],
         ')': [''],
         ',': [''],
         ':': [''],
