@@ -21,7 +21,7 @@ class SymbolTable:
         self.address = 104
         SymbolTable.instance = self
 
-    def add_symbol(self, lexeme, program_address=None, type=None, data=None, offset=None):
+    def add_symbol(self, lexeme, program_address=None, type=None, data=None, offset=None, arg_size=None):
         if lexeme not in self.table:
             self.table.append(lexeme)
             self.address += 4
@@ -31,8 +31,19 @@ class SymbolTable:
                 "offset": offset,
                 "program_address": program_address,
                 "type": type,
-                "data": data
+                "data": data,
+                "arg_size": arg_size,
             })
+
+    def get_arg_size(self, lexeme):
+        if lexeme in self.table:
+            index = self.table.index(lexeme)
+            return self.full_table[index]['arg_size']
+    
+    def set_arg_size(self, lexeme, size):
+        if lexeme in self.table:
+            index = self.table.index(lexeme)
+            self.full_table[index]['arg_size'] = size
     
     def get_offset(self, lexeme):
         if lexeme in self.table:

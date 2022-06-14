@@ -59,7 +59,7 @@ parse_table = {
     'B': {
         '=': ['=', 'C'],
         '[': ['[', 'Expression', ']', '#indirect_addr', '=', 'C'],
-        '(': ['#init_args', '(', 'Arguments', ')', '#assign_args', '#pop_func'],
+        '(': ['#check_func', '#init_args', '(', 'Arguments', ')', '#assign_args', '#pop_func'],
         ';': ['@']
     },
     'C': {
@@ -201,7 +201,7 @@ parse_table = {
         ';': [''],
         '[' : ['[', 'Expression', ']', '#indirect_addr', 'Primary'],
         ']': [''],
-        '(' : ['#init_args', '(', 'Arguments', ')', '#assign_args', '#push_return','Primary'],
+        '(' : ['#check_func', '#init_args', '(', 'Arguments', ')', '#assign_args', '#push_return','Primary'],
         ')': [''],
         ',': [''],
         ':': [''],

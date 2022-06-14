@@ -34,7 +34,7 @@ for test_dir in os.listdir('PA3_Testcases'):
     os.system('python3.8 compiler.py')
     print("Running test " + test_dir)
     failed = False
-    os.system("./tester > expected.txt")
+    os.system("./tester > expected.txt 2> null")
     os.system("grep PRINT expected.txt > expected2.txt")
     if file_equal(test_expected, "./expected2.txt"):
         passed_test_count += 1

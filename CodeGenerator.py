@@ -1,8 +1,10 @@
 from symbol_table import SymbolTable
+from semanticErrors import SemanticErrors
 import Parser
 
 
 class CodeGenerator:
+    errors = SemanticErrors()
     stack_top = 100000
     semantic_stack = []
     program_block = [("ASSIGN", "#100000", "100000")]
@@ -70,6 +72,13 @@ class CodeGenerator:
             self.add_global()
         elif action_symbol == "#stack_size":
             self.stack_size()
+        elif action_symbol == "#check_func":
+            self.check_func()
+
+    def check_func(self):
+        func_name = self.semantic_stack[self.head()][0].split(" ")[-1]
+        if func_name != "output" and SymbolTable.instance.get_type(func_name) != "function":
+            self.errors.add_error(type="b", data=func_name)
 
     def stack_size(self):
         max = SymbolTable.instance.get_max_func_size()
@@ -80,9 +89,15 @@ class CodeGenerator:
                 if item[j] == "!":
                     item[j] = to_replace
                     self.program_block[i] = tuple(item)
+        
+        if not SymbolTable.instance.get_address("main"):
+            self.errors.add_error(type="a")
+        print(self.errors.errors)
 
     def add_global(self):
         id = self.pop()
+        if SymbolTable.instance.get_scope(id[0]) != "global":
+            self.errors.add_error(type="b", data=id[0].split(" ")[-1])
         head = self.find_func_in_stack()
         item = self.semantic_stack[head]
         item[3].append(id[0].split(" ")[-1])
@@ -126,9 +141,15 @@ class CodeGenerator:
         self.pop()
         args = args[::-1]
         func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # To remove scope
-        if func_name == "output": # TODO: check if one argument exists
+        if func_name == "output":
+            if len(args) != 1:
+                self.errors.add_error(type="c", data="output")
+                return
             self.push_to_program_block(("PRINT", args[0]))
             return
+        param_size = SymbolTable.instance.get_arg_size(func_name)
+        if param_size != len(args):
+            self.errors.add_error(type="c", data=func_name)
 
         # save current stack top to tmp variable
         self.push_to_program_block(("ASSIGN", self.stack_top, self.tmp_address))
@@ -175,6 +196,7 @@ class CodeGenerator:
         for i in range(len(params)):
             SymbolTable.instance.add_symbol(params[i], type="parameter", offset=(i + 2))
         SymbolTable.instance.set_data(self.scope, len(params) + 2)
+        SymbolTable.instance.set_arg_size(self.scope, len(params))
         identifier = self.scope
         if identifier != "main":
             self.push_to_program_block(("JP", "?"))
@@ -313,14 +335,19 @@ class CodeGenerator:
         while index >= 0 and not (len(item) == 3 and item[2] == "jpf_while"):
             index -= 1
             item = self.semantic_stack[index]
+        if index < 0:
+            self.errors.add_error(type="d")
+            return
         self.push_to_program_block(("JP", "?"))
         line_no = self.program_line()
         item[0].append(line_no)
 
     def jp_continue(self):
         head = self.head()
-        while len(self.semantic_stack[head]) != 3 or self.semantic_stack[head][2] != "while":
+        while head >= 0 and (len(self.semantic_stack[head]) != 3 or self.semantic_stack[head][2] != "while"):
             head -= 1
+        if head < 0:
+            self.errors.add_error(type="e")
         i = self.semantic_stack[head][0]
         self.push_to_program_block(("JP", i))
 
