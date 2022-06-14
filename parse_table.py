@@ -4,15 +4,15 @@
 
 parse_table = {
     'Program': {
-        'break': ['Statements'],
-        'continue': ['Statements'],
-        'ID': ['Statements'],
-        'return': ['Statements'],
-        'global': ['Statements'],
-        'def': ['Statements'],
-        'if': ['Statements'],
-        'while': ['Statements'],
-        '$': ['Statements']
+        'break': ['Statements', '#stack_size'],
+        'continue': ['Statements', '#stack_size'],
+        'ID': ['Statements', '#stack_size'],
+        'return': ['Statements', '#stack_size'],
+        'global': ['Statements', '#stack_size'],
+        'def': ['Statements', '#stack_size'],
+        'if': ['Statements', '#stack_size'],
+        'while': ['Statements', '#stack_size'],
+        '$': ['Statements', '#stack_size']
     },
     'Statements': {
         ';': [''],
@@ -82,7 +82,7 @@ parse_table = {
         'NUM': ['Expression', '#return_value'],
     },
     'Global_stmt': {
-        'global': ['global', 'ID'],
+        'global': ['global', '#push_id','ID', '#add_global'],
         ';': ['@']
     },
     'Function_def': {

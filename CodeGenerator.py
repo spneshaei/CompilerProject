@@ -1,14 +1,14 @@
-from xml.dom.minidom import Identified
 from symbol_table import SymbolTable
 import Parser
 
 
 class CodeGenerator:
-    stack_top = 10000
+    stack_top = 100000
     semantic_stack = []
-    program_block = [("ASSIGN", "#10000", "10000")]
+    program_block = [("ASSIGN", "#100000", "100000")]
     scope = None
-    return_address = 100
+    tmp2_address = 96
+    tmp_address = 100
     return_value_address = 104
 
     def code_gen(self, action_symbol):
@@ -66,11 +66,32 @@ class CodeGenerator:
             self.pop_func()
         elif action_symbol == "#push_return":
             self.push_return()
+        elif action_symbol == "#add_global":
+            self.add_global()
+        elif action_symbol == "#stack_size":
+            self.stack_size()
+
+    def stack_size(self):
+        max = SymbolTable.instance.get_max_func_size()
+        to_replace = f"#{max * 4}"
+        for i in range(len(self.program_block)):
+            item = list(self.program_block[i])
+            for j in range(len(item)):
+                if item[j] == "!":
+                    item[j] = to_replace
+                    self.program_block[i] = tuple(item)
+
+    def add_global(self):
+        id = self.pop()
+        head = self.find_func_in_stack()
+        item = self.semantic_stack[head]
+        item[3].append(id[0].split(" ")[-1])
 
     def push_return(self):
         self.pop()
-        tmp_id = SymbolTable.instance.add_temp_symbol()
-        tmp_address = SymbolTable.instance.get_address(tmp_id)
+        tmp_id = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+        tmp_offset = SymbolTable.instance.get_offset(tmp_id)
+        tmp_address = self.generate_full_address(tmp_offset)
         self.push_to_program_block(("ASSIGN", self.return_value_address, tmp_address))
         self.push_to_stack((tmp_id, "ID"))
     
@@ -84,17 +105,11 @@ class CodeGenerator:
     def jp_return(self):
         if self.scope == "main":
             return
-        return_memory = SymbolTable.instance.get_address(f"{self.scope} return_address")
-        tmp = SymbolTable.instance.add_temp_symbol()
-        tmp_address = SymbolTable.instance.get_address(tmp)
-        self.push_to_program_block(("ADD", return_memory, self.stack_top, tmp_address))
-        tmp2 = SymbolTable.instance.add_temp_symbol()
-        tmp2_address = SymbolTable.instance.get_address(tmp2)
-        self.push_to_program_block(("ASSIGN", f"@{tmp_address}", tmp2_address))
-        prev_stack_top_address = SymbolTable.instance.get_address(f"{self.scope} prev_stack_top")
-        self.push_to_program_block(("ADD", self.stack_top, prev_stack_top_address, tmp_address))
-        self.push_to_program_block(("ASSIGN", f"@{tmp_address}", self.stack_top))
-        self.push_to_program_block(("JP", f"@{tmp2_address}"))
+        return_memory = self.generate_full_address(1)
+        self.push_to_program_block(("ASSIGN", return_memory, self.tmp_address))
+        prev_stack_top = self.generate_full_address(0)
+        self.push_to_program_block(("ASSIGN", prev_stack_top, self.stack_top))
+        self.push_to_program_block(("JP", f"@{self.tmp_address}"))
 
     def init_args(self):
         self.push_to_stack(("start_args", ""))
@@ -102,51 +117,39 @@ class CodeGenerator:
     def assign_args(self):
         args = []
         while self.semantic_stack[self.head()][0] != "start_args":
-            args.append(self.generate_address_mode(self.pop()))
+            item = self.pop()
+            address = self.generate_address_mode(item)
+            if SymbolTable.instance.get_type2(item[0]) == "array":
+                args.append(f"#{address}")
+            else:
+                args.append(address)
         self.pop()
         args = args[::-1]
-        func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # TO remove scope
+        func_name = self.semantic_stack[self.head()][0].split(" ")[-1] # To remove scope
         if func_name == "output": # TODO: check if one argument exists
             self.push_to_program_block(("PRINT", args[0]))
             return
 
-        prev_stack_top_tmp = SymbolTable.instance.add_temp_symbol()
-        prev_stack_top_tmp_address = SymbolTable.instance.get_address(prev_stack_top_tmp)
-        self.push_to_program_block(("ASSIGN", self.stack_top, prev_stack_top_tmp_address))
-        # update stack top
-        func_size = SymbolTable.instance.get_data(func_name)
-        func_address = SymbolTable.instance.get_address(func_name)
-        tmp = SymbolTable.instance.add_temp_symbol()
-        tmp_address = SymbolTable.instance.get_address(tmp)
-        tmp2 = SymbolTable.instance.add_temp_symbol()
-        tmp2_address = SymbolTable.instance.get_address(tmp2)
-        self.push_to_program_block(("MULT", func_address, "#4", tmp_address))
-        self.push_to_program_block(("ADD", tmp_address, self.stack_top, tmp2_address))
-        self.push_to_program_block(("ASSIGN", tmp2_address, self.stack_top))
+        # save current stack top to tmp variable
+        self.push_to_program_block(("ASSIGN", self.stack_top, self.tmp_address))
 
-        # save previous stack top
-        prev_stack_top_address = SymbolTable.instance.get_address(f"{func_name} prev_stack_top")
-        tmp = SymbolTable.instance.add_temp_symbol()
-        tmp_address = SymbolTable.instance.get_address(tmp)
-        self.push_to_program_block(("ADD", prev_stack_top_address, self.stack_top, tmp_address))
-        self.push_to_program_block(("ASSIGN", prev_stack_top_tmp_address, f"@{tmp_address}"))
-        
+        # update stack top
+        tmp_id = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+        tmp_offset = SymbolTable.instance.get_offset(tmp_id)
+        tmp_address = self.generate_full_address(tmp_offset)
+        self.push_to_program_block(("ADD", f"!", self.stack_top, tmp_address))
+        self.push_to_program_block(("ASSIGN", tmp_address, self.stack_top))
+        # save prev stack top in new function frame, i.e offset = 0
+        self.push_to_program_block(("ASSIGN", self.tmp_address, f"@{self.stack_top}"))
 
         func_program_line = SymbolTable.instance.get_program_address(func_name)
         index = 1
         for i in range(len(args)): # TODO: check number of arguments
-            arg_address = func_address + 4 * index
-            tmp = SymbolTable.instance.add_temp_symbol()
-            tmp_address = SymbolTable.instance.get_address(tmp)
-            self.push_to_program_block(("ADD", arg_address, self.stack_top, tmp_address))
-            self.push_to_program_block(("ASSIGN", args[i], f"@{tmp_address}"))
+            arg_address = self.generate_full_address(i + 2)
+            self.push_to_program_block(("ASSIGN", args[i], arg_address))
             index += 1
-        
-        tmp = SymbolTable.instance.add_temp_symbol()
-        tmp_address = SymbolTable.instance.get_address(tmp)
-        return_address = SymbolTable.instance.get_address(f"{func_name} return_address")
-        self.push_to_program_block(("ADD", return_address, self.stack_top, tmp_address))
-        self.push_to_program_block(("ASSIGN", f"#{self.program_line() + 3}", f"@{tmp_address}")) # return value for function
+        return_address = self.generate_full_address(1)
+        self.push_to_program_block(("ASSIGN", f"#{self.program_line() + 3}", return_address)) # return progrm line for function
         self.push_to_program_block(("JP", func_program_line))
 
     def end_func(self):
@@ -159,12 +162,7 @@ class CodeGenerator:
                 to_back_patch = list(self.program_block[top_item[0]])
                 to_back_patch[1] = self.program_line() + 1
                 self.program_block[top_item[0]] = tuple(to_back_patch)
-        def_func = self.pop()
-        if len(top_item) == 2 and top_item[1] == 'LINE_NO':
-            to_back_patch = list(self.program_block[top_item[0] - 1])
-            to_back_patch[1] = f"#{def_func[2] + 1}"
-            self.program_block[top_item[0] - 1] = tuple(to_back_patch)
-        SymbolTable.instance.set_data(def_func[1], def_func[2]) # set size of function in symbol table
+        self.pop() # pop func_def and globals
 
     def assign_param(self):
         params = []
@@ -172,65 +170,35 @@ class CodeGenerator:
             params.append(self.pop()[0])
         self.pop()
         params = params[::-1]
-        index = 0
+        SymbolTable.instance.add_symbol(f"{self.scope} prev_stack_top", type="prev_stack_top", offset=0)
+        SymbolTable.instance.add_symbol(f"{self.scope} return", type="return", offset=1)
         for i in range(len(params)):
-            SymbolTable.instance.add_symbol(params[i], type="parameter")
-            symbol_address = SymbolTable.instance.get_address(params[i])
-            self.push_to_program_block(("ASSIGN", f"#{i*4}", symbol_address))
-            index += 1
-        SymbolTable.instance.add_symbol(f"{self.scope} return", type="return")
-        return_address = SymbolTable.instance.get_address(f"{self.scope} return")
-        self.push_to_program_block(("ASSIGN", f"#{index*4}", return_address))
-        index += 1
-        SymbolTable.instance.add_symbol(f"{self.scope} return_address", type="return_address")
-        return_address = SymbolTable.instance.get_address(f"{self.scope} return_address")
-        self.push_to_program_block(("ASSIGN", f"#{index*4}", return_address))
-        index += 1
-        SymbolTable.instance.add_symbol(f"{self.scope} prev_stack_top", type="stack_top")
-        prev_stack_top_address = SymbolTable.instance.get_address(f"{self.scope} prev_stack_top")
-        self.push_to_program_block(("ASSIGN", f"#{index*4}", prev_stack_top_address))
-
+            SymbolTable.instance.add_symbol(params[i], type="parameter", offset=(i + 2))
+        SymbolTable.instance.set_data(self.scope, len(params) + 2)
         identifier = self.scope
         if identifier != "main":
-            func_address = SymbolTable.instance.get_address(identifier)
-            self.push_to_program_block(("ASSIGN", "?", func_address))
             self.push_to_program_block(("JP", "?"))
             SymbolTable.instance.set_program_address(identifier, self.program_line() + 1)
             self.push_to_stack((self.program_line(), "LINE_NO"))
-
-        head = self.find_func_in_stack()
-        item = list(self.semantic_stack[head])
-        item[2] = index
-        self.semantic_stack[head] = tuple(item)
     
     def init_param(self):
         self.push_to_stack(("start_param", ""))
 
     def func_def(self):
         identifier = Parser.Parser.instance.next_token[1]
-        self.push_to_stack(("func_def", identifier, 0))
-        # if identifier != "main":
-        #     self.push_to_program_block(("JP", "?"))
-        #     self.push_to_stack((self.program_line(), "LINE_NO"))
+        self.push_to_stack(("func_def", identifier, 0, [])) #func_def, func_name, func_size, globals
         self.scope = identifier
-        SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function")
+        SymbolTable.instance.add_symbol(identifier, program_address=self.program_line() + 1, type="function", data=0)
 
     def assign(self):
         value = self.pop()
         identifier = self.pop()
-        address = SymbolTable.instance.get_address(identifier[0])
-        should_assign = self.scope != None
-        if address:
-            should_assign = False
         if (identifier[2] == "direct"):
-            SymbolTable.instance.add_symbol(identifier[0], type="integer")
-        address = SymbolTable.instance.get_address(identifier[0])
-        if should_assign and SymbolTable.instance.get_scope(identifier[0]) != "global":
-            head = self.find_func_in_stack()
-            item = list(self.semantic_stack[head])
-            item[2] += 1
-            self.semantic_stack[head] = tuple(item)
-            self.push_to_program_block(("ASSIGN", f"#{self.semantic_stack[head][2] * 4}", address))
+            offset = None
+            if self.scope:
+                offset = SymbolTable.instance.get_data(self.scope) + 1
+                SymbolTable.instance.set_data(self.scope, offset)
+            SymbolTable.instance.add_symbol(identifier[0], type="integer", offset=offset)
         address = self.generate_address_mode(identifier)
         if SymbolTable.instance.get_type(value[0].split()[-1]) == "function":
             self.push_to_program_block(("ASSIGN", self.return_value_address, address))
@@ -246,11 +214,25 @@ class CodeGenerator:
         values = values[::-1]
         self.pop()
         identifier = self.pop()[0]
-        SymbolTable.instance.add_symbol(identifier, type="array")
-        SymbolTable.instance.allocate((len(values)) * 4)
-        identifier = SymbolTable.instance.get_address(identifier)
-        for i in range(len(values)):
-            self.push_to_program_block(("ASSIGN", values[i], identifier + 4 * i))
+        offset = None
+        if self.scope:
+            offset = SymbolTable.instance.get_data(self.scope) + 1
+            SymbolTable.instance.set_data(self.scope, offset)
+        SymbolTable.instance.add_symbol(identifier, type="array", offset=offset)
+        if self.scope:
+            SymbolTable.instance.set_data(self.scope, offset + len(values))
+            tmp_id = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+            tmp_offset = SymbolTable.instance.get_offset(tmp_id)
+            tmp_address = self.generate_full_address(tmp_offset)
+            tmp_address = tmp_address[1:]
+            for i in range(len(values)):
+                self.push_to_program_block(("ADD", self.stack_top, f"#{(offset + i) * 4}", tmp_address))
+                self.push_to_program_block(("ASSIGN", values[i], f"@{tmp_address}"))
+        else:
+            SymbolTable.instance.allocate((len(values) + 3) * 4)
+            identifier = SymbolTable.instance.get_address(identifier)
+            for i in range(len(values)):
+                self.push_to_program_block(("ASSIGN", values[i], identifier + 4 * i))
 
     def init_array(self):
         self.push_to_stack(("start_array", ""))
@@ -273,10 +255,11 @@ class CodeGenerator:
         value1 = self.generate_address_mode(self.pop())
         operator = self.generate_operator(self.pop()[0])
         value2 = self.generate_address_mode(self.pop())
-        temp_id = SymbolTable.instance.add_temp_symbol()
-        temp_address = SymbolTable.instance.get_address(temp_id)
-        self.push_to_program_block((operator, value2, value1, temp_address))
-        self.push_to_stack((temp_id, "ID"))
+        tmp_id = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+        tmp_offset = SymbolTable.instance.get_offset(tmp_id)
+        tmp_address = self.generate_full_address(tmp_offset)
+        self.push_to_program_block((operator, value2, value1, tmp_address))
+        self.push_to_stack((tmp_id, "ID"))
 
     def label(self):
         i = len(self.program_block)
@@ -292,14 +275,14 @@ class CodeGenerator:
         self.push_to_program_block(("JP", labeled_i))
 
     def save_if(self):
-        i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
+        i = len(self.program_block) 
         self.push_to_program_block(("JPF", value, "?"))
         self.push_to_stack((i, "LINE_NO", "jpf_save"))
     
     def save_while(self):
-        i = len(self.program_block) 
         value = self.generate_address_mode(self.pop())
+        i = len(self.program_block) 
         self.push_to_program_block(("JPF", value, "?"))
         self.push_to_stack(([i], "LINE_NO", "jpf_while"))
     
@@ -343,16 +326,25 @@ class CodeGenerator:
 
     def indirect_addr(self):
         value = self.generate_address_mode(self.pop())
-        id = self.generate_address_mode(self.pop())
-        temp_id1 = SymbolTable.instance.add_temp_symbol()
-        temp_address1 = SymbolTable.instance.get_address(temp_id1)
+        identifier = self.pop()
+        id = self.generate_address_mode(identifier)
+        tmp_id1 = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+        tmp_offset1 = SymbolTable.instance.get_offset(tmp_id1)
+        temp_address1 = self.generate_full_address(tmp_offset1)
         self.push_to_program_block(("MULT", value, "#4", temp_address1))
-        temp_id2 = SymbolTable.instance.add_temp_symbol()
-        temp_address2 = SymbolTable.instance.get_address(temp_id2)
-        if self.scope:
+
+        temp_id2 = SymbolTable.instance.add_temp_symbol_in_stack(self.scope)
+        tmp_offset2 = SymbolTable.instance.get_offset(temp_id2)
+        temp_address2 = self.generate_full_address(tmp_offset2)
+        if SymbolTable.instance.get_scope(identifier[0]) != "global":
+            if SymbolTable.instance.get_type(identifier[0]) != "parameter":
+                id = id[1:]
             self.push_to_program_block(("ADD", f"{id}", temp_address1, temp_address2))
         else:
             self.push_to_program_block(("ADD", f"#{id}", temp_address1, temp_address2))
+        # if SymbolTable.instance.get_type(identifier[0]) == "array" and SymbolTable.instance.get_scope(identifier[0]) != "global":
+        #     self.push_to_stack((temp_id2, "ID", "indirect_local_array"))
+        # else:
         self.push_to_stack((temp_id2, "ID", "indirect"))
 
 
@@ -379,21 +371,33 @@ class CodeGenerator:
 
     def generate_address_mode(self, value):
         if value[1] == "ID":
+            globals = self.get_globals()
             address = SymbolTable.instance.get_address(value[0])
-            if not address:
+            if self.scope == None and address:
+                return f"{address}"
+            if len(value) == 3 and value[2] == "indirect_local_array":
+                if SymbolTable.instance.get_type(value[0]) == "temp":
+                    to_return = self.generate_full_address(SymbolTable.instance.get_offset(value[0]))
+                    return f"{to_return}"
+                return f"@{address}"
+            if len(value) == 3 and value[2] == "indirect":
+                if SymbolTable.instance.get_type(value[0]) == "temp":
+                    to_return = self.generate_full_address(SymbolTable.instance.get_offset(value[0]))
+                    tmp = SymbolTable.instance.add_temp_symbol()
+                    tmp_address = SymbolTable.instance.get_address(tmp)
+                    self.push_to_program_block(("ASSIGN", to_return, tmp_address))
+                    return f"@{tmp_address}"
+                return f"@{address}"
+            if SymbolTable.instance.get_type(value[0]) == "tmp":
+                return f"{address}"
+            if self.scope and (value[0].split(" ")[-1] in globals or (self.scope == "main" and address == None)):
                 value = list(value)
                 value[0] = value[0].split(" ")[-1]
-                return self.generate_address_mode(tuple(value))
-            if len(value[0].split(" ")) > 1: # scoped identifier
-                tmp = SymbolTable.instance.add_temp_symbol()
-                tmp_address = SymbolTable.instance.get_address(tmp)
-                self.push_to_program_block(("ADD", address, self.stack_top, tmp_address))
-                return f"@{tmp_address}"
-            if (len(value) == 3 and value[2] == "indirect"):
-                return f"@{address}"
-            if SymbolTable.instance.get_type(value[0]) == "array":
-                return f"#{address}"
-            return f"{address}"
+                value = tuple(value)
+                address = SymbolTable.instance.get_address(value[0])
+                return f"{address}"
+            offset = SymbolTable.instance.get_offset(value[0])
+            return self.generate_full_address(offset)
         if value[1] == "NUM":
             return f"#{value[0]}"
     
@@ -422,6 +426,13 @@ class CodeGenerator:
             i += 1    
         file.close()
 
+    def generate_full_address(self, offset):
+        tmp = SymbolTable.instance.add_temp_symbol()
+        tmp_address = SymbolTable.instance.get_address(tmp)
+        self.push_to_program_block(("ADD", self.stack_top, f"#{offset * 4}", tmp_address))
+        return f"@{tmp_address}"
+
+
     #for debugging purposes only
     def print_program_block(self):
         i = 0
@@ -434,11 +445,19 @@ class CodeGenerator:
                 print(f"{i}\t({item[0]}, {item[1]}, ,)")
             i += 1
 
-    
     def find_func_in_stack(self):
         head = self.head()
+        if head < 0:
+            return -1
         item = self.semantic_stack[head]
-        while item[0] != "func_def":
+        while head >= 0 and item[0] != "func_def":
             head -= 1
             item = self.semantic_stack[head]
         return head
+
+    def get_globals(self):
+        head = self.find_func_in_stack()
+        if head < 0:
+            return []
+        item = self.semantic_stack[head]
+        return item[3]
